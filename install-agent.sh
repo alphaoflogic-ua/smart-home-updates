@@ -6,6 +6,7 @@ set -euo pipefail
 UPDATES_REPO="${UPDATES_REPO:-alphaoflogic-ua/smart-home-updates}"
 BRANCH="${BRANCH:-main}"
 RAW="https://raw.githubusercontent.com/${UPDATES_REPO}/${BRANCH}"
+BINARY_URL="https://github.com/${UPDATES_REPO}/raw/${BRANCH}/station-agent"
 
 AGENT_DEST="${AGENT_DEST:-/opt/station-agent}"
 AGENT_DATA_DIR="${AGENT_DATA_DIR:-/var/lib/station-agent}"
@@ -81,25 +82,13 @@ prompt_value() {
   done
 }
 
-# ── [1/6] prerequisites ───────────────────────────────────────────────────────
+# ── [1/5] docker ──────────────────────────────────────────────────────────────
 
-log "[1/6] Checking prerequisites..."
+log "[1/5] Checking Docker..."
 
 if ! command -v curl >/dev/null 2>&1; then
   sudo apt-get update -qq && sudo apt-get install -y curl
 fi
-
-if ! command -v node >/dev/null 2>&1; then
-  log "Node.js not found. Installing Node.js 20..."
-  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-  sudo apt-get install -y nodejs
-fi
-
-echo "Node.js: $(node --version)"
-
-# ── [2/6] docker ──────────────────────────────────────────────────────────────
-
-log "[2/6] Checking Docker..."
 
 if ! command -v docker >/dev/null 2>&1; then
   log "Docker not found. Installing..."
@@ -120,23 +109,23 @@ fi
 
 echo "Docker: $(docker --version)"
 
-# ── [3/6] download deployment files ──────────────────────────────────────────
+# ── [2/5] download deployment files ──────────────────────────────────────────
 
-log "[3/6] Downloading deployment files to $DEPLOY_DIR..."
+log "[2/5] Downloading deployment files to $DEPLOY_DIR..."
 
 mkdir -p "$DEPLOY_DIR/nginx/conf.d" "$DEPLOY_DIR/nginx/certs" "$DEPLOY_DIR/scripts"
 
-download "docker-compose.yml"          "$DEPLOY_DIR/docker-compose.yml"
-download "docker-compose.prod.yml"     "$DEPLOY_DIR/docker-compose.prod.yml"
-download "nginx/conf.d/default.conf"   "$DEPLOY_DIR/nginx/conf.d/default.conf"
-download "scripts/bootstrap-host.sh"  "$DEPLOY_DIR/scripts/bootstrap-host.sh"
-download "scripts/deploy-station.sh"  "$DEPLOY_DIR/scripts/deploy-station.sh"
+download "docker-compose.yml"         "$DEPLOY_DIR/docker-compose.yml"
+download "docker-compose.prod.yml"    "$DEPLOY_DIR/docker-compose.prod.yml"
+download "nginx/conf.d/default.conf"  "$DEPLOY_DIR/nginx/conf.d/default.conf"
+download "scripts/bootstrap-host.sh" "$DEPLOY_DIR/scripts/bootstrap-host.sh"
+download "scripts/deploy-station.sh" "$DEPLOY_DIR/scripts/deploy-station.sh"
 
 chmod +x "$DEPLOY_DIR/scripts/bootstrap-host.sh" "$DEPLOY_DIR/scripts/deploy-station.sh"
 
-# ── [4/6] stack setup (first time) ───────────────────────────────────────────
+# ── [3/5] stack setup (first time) ───────────────────────────────────────────
 
-log "[4/6] Checking station stack..."
+log "[3/5] Checking station stack..."
 
 if [ ! -f "$DEPLOY_DIR/.env" ]; then
   log "Running station setup..."
@@ -146,41 +135,22 @@ else
   log "Stack already configured — skipping."
 fi
 
-# ── [5/6] install agent ───────────────────────────────────────────────────────
+# ── [4/5] install agent binary ────────────────────────────────────────────────
 
-log "[5/6] Installing station-agent to $AGENT_DEST..."
+log "[4/5] Installing station-agent binary to $AGENT_DEST..."
 
-AGENT_FILES=(
-  "station-agent/src/server.js"
-  "station-agent/src/config.js"
-  "station-agent/src/updater.js"
-  "station-agent/src/docker.js"
-  "station-agent/src/healthcheck.js"
-  "station-agent/src/version.js"
-  "station-agent/src/bootstrap.js"
-  "station-agent/package.json"
-  "station-agent/package-lock.json"
-)
-
-sudo mkdir -p "$AGENT_DEST/src"
+sudo mkdir -p "$AGENT_DEST"
 sudo mkdir -p "$AGENT_DATA_DIR"
 
-for file in "${AGENT_FILES[@]}"; do
-  dest="$AGENT_DEST/${file#station-agent/}"
-  sudo mkdir -p "$(dirname "$dest")"
-  curl -fsSL "${RAW}/${file}" | sudo tee "$dest" > /dev/null
-done
+curl -fsSL "$BINARY_URL" | sudo tee "$AGENT_DEST/station-agent" > /dev/null
+sudo chmod +x "$AGENT_DEST/station-agent"
 
 sudo chown -R "$USER":"$USER" "$AGENT_DEST"
 sudo chown -R "$USER":"$USER" "$AGENT_DATA_DIR"
 
-log "Installing npm dependencies..."
-cd "$AGENT_DEST"
-npm install --omit=dev --silent
+# ── [5/5] configure .env + systemd ───────────────────────────────────────────
 
-# ── [6/6] configure agent .env + systemd ─────────────────────────────────────
-
-log "[6/6] Configuring agent..."
+log "[5/5] Configuring agent..."
 
 STACK_ENV="$DEPLOY_DIR/.env"
 
@@ -218,8 +188,6 @@ DOCKER_TOKEN='$docker_token'
 AGENT_TOKEN='$agent_token'
 EOF
 
-NODE_BIN=$(command -v node)
-
 sudo tee /etc/systemd/system/${SERVICE_NAME}.service > /dev/null <<EOF
 [Unit]
 Description=Station Agent — smart home auto-updater
@@ -232,7 +200,7 @@ Type=simple
 User=$USER
 WorkingDirectory=$AGENT_DEST
 EnvironmentFile=$AGENT_DEST/.env
-ExecStart=$NODE_BIN src/server.js
+ExecStart=$AGENT_DEST/station-agent
 Restart=always
 RestartSec=15
 StandardOutput=journal
