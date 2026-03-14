@@ -179,7 +179,7 @@ station_id=$(prompt_value "Station ID" "${cur_station_id:-${stack_station_id:-}}
 update_url=$(prompt_value "Update manifest URL" "${cur_update_url:-https://raw.githubusercontent.com/alphaoflogic-ua/smart-home-updates/main/release.json}" true false)
 check_interval=$(prompt_value "Check interval (minutes)" "${cur_interval:-60}" false false)
 auto_update=$(prompt_value "Auto update (true/false)" "${cur_auto:-true}" false false)
-healthcheck_url=$(prompt_value "Healthcheck URL" "${cur_healthcheck:-http://localhost/api/health}" false false)
+healthcheck_url=$(prompt_value "Healthcheck URL" "${cur_healthcheck:-http://localhost:3000/health}" false false)
 agent_token=$(prompt_value "Agent API token (optional, recommended)" "${cur_agent_token:-}" false true)
 
 cat > "$AGENT_DEST/.env" <<EOF
