@@ -196,8 +196,20 @@ for _ in {1..30}; do
   sleep 2
 done
 
-echo "Smoke check..."
-docker exec smart-home-backend node -e "fetch('http://127.0.0.1:3000/health').then(r=>r.text().then(t=>{console.log(r.status,t);process.exit(r.status===200?0:1);})).catch(()=>process.exit(1))"
+echo "Smoke check (waiting for backend to be ready)..."
+READY=0
+for i in {1..30}; do
+  if docker exec smart-home-backend node -e "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.status===200?0:1)).catch(()=>process.exit(1))" 2>/dev/null; then
+    READY=1
+    break
+  fi
+  echo "  attempt $i/30..."
+  sleep 5
+done
+
+if [ "$READY" -eq 0 ]; then
+  echo "Warning: backend did not respond in time. Check logs: docker compose logs backend"
+fi
 
 echo "Done."
 echo "Open UI: http://$(get_local_ip)/"

@@ -225,10 +225,14 @@ sudo systemctl restart "$SERVICE_NAME"
 
 sleep 3
 
+LOCAL_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
+
 echo ""
 echo "Done. Station agent is running."
 echo ""
 sudo systemctl status "$SERVICE_NAME" --no-pager -l || true
+echo ""
+echo "Open in browser:  http://${LOCAL_IP:-localhost}"
 echo ""
 echo "Useful commands:"
 echo "  sudo systemctl status $SERVICE_NAME"
