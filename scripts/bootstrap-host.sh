@@ -13,8 +13,10 @@ sudo sh /tmp/get-docker.sh
 
 echo "[3/7] Installing Bluetooth and system dependencies..."
 sudo apt install -y bluez util-linux rfkill
-sudo systemctl enable bluetooth
-sudo systemctl start bluetooth
+# bluetoothd is NOT started — noble (inside Docker) uses raw HCI socket directly
+# and bluetoothd interferes with BLE connect and GATT operations
+sudo systemctl disable bluetooth || true
+sudo systemctl stop bluetooth || true
 
 echo "[4/7] Configuring Bluetooth on host..."
 if command -v rfkill >/dev/null 2>&1; then
@@ -26,6 +28,24 @@ if command -v hciconfig >/dev/null 2>&1; then
   echo "Bringing hci0 up..."
   sudo hciconfig hci0 up || true
 fi
+
+# Ensure hci0 stays powered after reboot (no bluetoothd to do it)
+sudo tee /etc/systemd/system/hci0-up.service > /dev/null <<'SERVICE'
+[Unit]
+Description=Power up Bluetooth HCI adapter for noble
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStartPre=/usr/sbin/rfkill unblock bluetooth
+ExecStart=/usr/bin/hciconfig hci0 up
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+SERVICE
+sudo systemctl daemon-reload
+sudo systemctl enable hci0-up.service
 
 if [ -d "/sys/class/bluetooth/hci0" ]; then
   echo "Bluetooth adapter hci0 detected"
