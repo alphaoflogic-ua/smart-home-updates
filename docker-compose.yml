@@ -28,8 +28,9 @@ services:
     restart: unless-stopped
     privileged: true
     network_mode: host
-    volumes:
-      - /var/run/dbus:/var/run/dbus
+    # Bring hci0 down before noble starts so HCI_CHANNEL_USER binding succeeds.
+    # (The host may have hci0 up via hci0-up.service or bluetoothd.)
+    command: sh -c "hciconfig hci0 down 2>/dev/null || true; exec node dist/server.js"
     environment:
       - DB_HOST=127.0.0.1
       - DB_PORT=5432
@@ -55,10 +56,12 @@ services:
       - JWT_REFRESH_EXPIRES_IN=${JWT_REFRESH_EXPIRES_IN:-7d}
       - BACKEND_PUBLIC_URL=${BACKEND_PUBLIC_URL}
       - MQTT_PUBLIC_HOST=${MQTT_PUBLIC_HOST}
-      # Debug Noble
-      - DEBUG=noble*
-      # Share HCI socket with bluetoothd so connection events are not intercepted
-      - NOBLE_REPORT_ALL_HCI_EVENTS=1
+      # Use HCI_CHANNEL_USER so the kernel hands off hci0 entirely to noble.
+      # This prevents the kernel from issuing its own HCI commands (e.g. LE Read Remote Used Features)
+      # that delay GATT by ~288ms and cause ESP32 to time out before provisioning data arrives.
+      # Requires hci0 to be DOWN on the host (hci0-up.service must be disabled).
+      - HCI_CHANNEL_USER=1
+      - NOBLE_HCI_DEVICE_ID=0
     depends_on:
       postgres:
         condition: service_healthy

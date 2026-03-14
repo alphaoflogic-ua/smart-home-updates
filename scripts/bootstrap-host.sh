@@ -24,28 +24,24 @@ if command -v rfkill >/dev/null 2>&1; then
   sudo rfkill unblock bluetooth || true
 fi
 
-if command -v hciconfig >/dev/null 2>&1; then
-  echo "Bringing hci0 up..."
-  sudo hciconfig hci0 up || true
+# noble uses HCI_CHANNEL_USER inside Docker, which requires hci0 to be DOWN on the host.
+# In HCI_CHANNEL_USER mode, noble fully owns the HCI device and initialises it itself
+# via HCI Reset — the kernel sends no automatic HCI commands (e.g. LE Read Remote Used Features)
+# that would otherwise delay GATT by ~288ms and cause ESP32 provisioning to time out.
+# Remove any legacy hci0-up.service that brings the adapter up (this would conflict).
+if systemctl is-enabled hci0-up.service >/dev/null 2>&1; then
+  echo "Disabling legacy hci0-up.service (incompatible with HCI_CHANNEL_USER)..."
+  sudo systemctl disable hci0-up.service || true
+  sudo systemctl stop hci0-up.service || true
 fi
-
-# Ensure hci0 stays powered after reboot (no bluetoothd to do it)
-sudo tee /etc/systemd/system/hci0-up.service > /dev/null <<'SERVICE'
-[Unit]
-Description=Power up Bluetooth HCI adapter for noble
-After=network.target
-
-[Service]
-Type=oneshot
-ExecStartPre=/usr/sbin/rfkill unblock bluetooth
-ExecStart=/usr/bin/hciconfig hci0 up
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target
-SERVICE
+sudo rm -f /etc/systemd/system/hci0-up.service
 sudo systemctl daemon-reload
-sudo systemctl enable hci0-up.service
+
+# Ensure hci0 is DOWN so noble can claim it via HCI_CHANNEL_USER
+if command -v hciconfig >/dev/null 2>&1; then
+  echo "Ensuring hci0 is down (noble will initialise it)..."
+  sudo hciconfig hci0 down 2>/dev/null || true
+fi
 
 if [ -d "/sys/class/bluetooth/hci0" ]; then
   echo "Bluetooth adapter hci0 detected"
