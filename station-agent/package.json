@@ -1,0 +1,20 @@
+{
+  "name": "station-agent",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Smart Home Station Update Agent",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "agent:start": "bash ./scripts/agent-start.sh",
+    "build:sea": "bash scripts/build-sea.sh arm64"
+  },
+  "dependencies": {
+    "semver": "^7.7.3"
+  },
+  "devDependencies": {
+    "esbuild": "^0.20.0",
+    "postject": "^1.0.0-alpha.6"
+  }
+}

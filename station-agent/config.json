@@ -1,0 +1,17 @@
+{
+  "port": 3001,
+  "checkIntervalMinutes": 60,
+  "composeProjectPath": "~/smart-home",
+  "composeFile": "docker-compose.yml",
+  "currentVersionDefault": "1.0.0",
+  "autoUpdate": true,
+  "healthcheckUrl": "http://localhost/api/health",
+  "stabilizationSeconds": 45,
+  "requestTimeoutMs": 10000,
+  "dataDir": "~/station-agent-data",
+  "services": ["backend", "frontend"],
+  "containerNames": {
+    "backend": "smart-home-backend",
+    "frontend": "smart-home-frontend"
+  }
+}

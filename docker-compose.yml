@@ -1,0 +1,89 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: smart-home-db
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${DB_USER} -d ${DB_NAME}']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: smart-home-mqtt
+    restart: unless-stopped
+    network_mode: host
+
+  backend:
+    image: andriicode/smart-home-backend:latest
+    container_name: smart-home-backend
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+    volumes:
+      - /var/run/dbus:/var/run/dbus
+    environment:
+      - DB_HOST=127.0.0.1
+      - DB_PORT=5432
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - PORT=3000
+      - NODE_ENV=production
+      - MQTT_URL=mqtt://127.0.0.1:1883
+      - MQTT_USER=${MQTT_USER}
+      - MQTT_PASSWORD=${MQTT_PASSWORD}
+      - STATION_ID=${STATION_ID}
+      - PROVISIONING_SERVICE_UUID=${PROVISIONING_SERVICE_UUID}
+      - PROVISIONING_CHARACTERISTIC_UUID=${PROVISIONING_CHARACTERISTIC_UUID}
+      - PROVISIONING_WIFI_SSID=${PROVISIONING_WIFI_SSID}
+      - PROVISIONING_WIFI_PASSWORD=${PROVISIONING_WIFI_PASSWORD}
+      - PROVISIONING_SCAN_ALL=${PROVISIONING_SCAN_ALL:-false}
+      - PROVISIONING_ALLOW_NAMELESS=${PROVISIONING_ALLOW_NAMELESS:-false}
+      - DEBUG_BLE_SCAN=${DEBUG_BLE_SCAN:-true}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - JWT_EXPIRES_IN=${JWT_EXPIRES_IN:-1h}
+      - JWT_REFRESH_EXPIRES_IN=${JWT_REFRESH_EXPIRES_IN:-7d}
+      - BACKEND_PUBLIC_URL=${BACKEND_PUBLIC_URL}
+      - MQTT_PUBLIC_HOST=${MQTT_PUBLIC_HOST}
+      # Debug Noble
+      - DEBUG=noble*
+      # Ensure active scanning is requested at HCI level
+      - NOBLE_MULTI_ROLE=1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+
+  frontend:
+    image: andriicode/smart-home-frontend:latest
+    # platform: linux/amd64
+    container_name: smart-home-frontend
+    restart: unless-stopped
+    network_mode: host
+    depends_on:
+      - backend
+
+  nginx:
+    image: nginx:alpine
+    container_name: smart-home-proxy
+    restart: unless-stopped
+    network_mode: host
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    depends_on:
+      - backend
+      - frontend
+
+volumes:
+  postgres_data:
