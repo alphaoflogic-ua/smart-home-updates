@@ -14,12 +14,12 @@ SERVICE_NAME="station-agent"
 
 # ── guard: needs a real TTY for interactive prompts ───────────────────────────
 
-if [ ! -t 0 ]; then
+if [ ! -t 0 ] && [ -z "${_INSTALL_REEXEC:-}" ]; then
   TMP=$(mktemp /tmp/install-agent.XXXXXX.sh)
   curl -fsSL "${RAW}/install-agent.sh" -o "$TMP"
   chmod +x "$TMP"
   echo "Re-running with TTY..."
-  exec bash "$TMP" "$@" < /dev/tty
+  _INSTALL_REEXEC=1 exec bash "$TMP" "$@" < /dev/tty
 fi
 
 # ── helpers ───────────────────────────────────────────────────────────────────
