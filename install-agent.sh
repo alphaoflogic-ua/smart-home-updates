@@ -6,7 +6,7 @@ set -euo pipefail
 UPDATES_REPO="${UPDATES_REPO:-alphaoflogic-ua/smart-home-updates}"
 BRANCH="${BRANCH:-main}"
 RAW="https://raw.githubusercontent.com/${UPDATES_REPO}/${BRANCH}"
-BINARY_URL="https://github.com/${UPDATES_REPO}/raw/${BRANCH}/station-agent"
+BINARY_URL="https://raw.githubusercontent.com/${UPDATES_REPO}/${BRANCH}/station-agent/station-agent-linux-arm64"
 
 AGENT_DEST="${AGENT_DEST:-/opt/station-agent}"
 AGENT_DATA_DIR="${AGENT_DATA_DIR:-/var/lib/station-agent}"
