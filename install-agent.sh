@@ -56,13 +56,13 @@ prompt_value() {
       else
         printf "%s: " "$prompt_text" >&2
       fi
-      read -rs value
+      read -rs value < /dev/tty
       echo >&2
     else
       if [ -n "$default" ]; then
-        read -rp "$prompt_text [$default]: " value
+        read -rp "$prompt_text [$default]: " value < /dev/tty
       else
-        read -rp "$prompt_text: " value
+        read -rp "$prompt_text: " value < /dev/tty
       fi
     fi
 

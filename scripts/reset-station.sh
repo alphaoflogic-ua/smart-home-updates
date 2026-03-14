@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+if [ ! -t 0 ] && [ -z "${_RESET_REEXEC:-}" ]; then
+  TMP=$(mktemp /tmp/reset-station.XXXXXX.sh)
+  curl -fsSL "https://raw.githubusercontent.com/alphaoflogic-ua/smart-home-updates/main/reset-station.sh" -o "$TMP"
+  chmod +x "$TMP"
+  _RESET_REEXEC=1 exec bash "$TMP" "$@" < /dev/tty
+fi
+
 AGENT_DEST="${AGENT_DEST:-/opt/station-agent}"
 AGENT_DATA_DIR="${AGENT_DATA_DIR:-/var/lib/station-agent}"
 DEPLOY_DIR="${DEPLOY_DIR:-${HOME}/smart-home}"
@@ -13,7 +20,7 @@ echo "  - agent data:      $AGENT_DATA_DIR"
 echo "  - stack:           $DEPLOY_DIR (docker compose down -v)"
 echo "  - docker images:   all unused images"
 echo ""
-read -rp "Continue? [y/N]: " confirm
+read -rp "Continue? [y/N]: " confirm < /dev/tty
 if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
   echo "Aborted."
   exit 0
