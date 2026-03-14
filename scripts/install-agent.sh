@@ -19,7 +19,7 @@ if [ ! -t 0 ]; then
   curl -fsSL "${RAW}/install-agent.sh" -o "$TMP"
   chmod +x "$TMP"
   echo "Re-running with TTY..."
-  exec bash "$TMP" "$@"
+  exec bash "$TMP" "$@" < /dev/tty
 fi
 
 # ── helpers ───────────────────────────────────────────────────────────────────
