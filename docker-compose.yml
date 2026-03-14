@@ -57,8 +57,6 @@ services:
       - MQTT_PUBLIC_HOST=${MQTT_PUBLIC_HOST}
       # Debug Noble
       - DEBUG=noble*
-      # Allow scanning while connected (prevents noble from losing peripheral state after connect)
-      - NOBLE_MULTI_ROLE=1
       # Share HCI socket with bluetoothd so connection events are not intercepted
       - NOBLE_REPORT_ALL_HCI_EVENTS=1
     depends_on:
