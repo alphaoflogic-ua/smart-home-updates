@@ -158,7 +158,7 @@ provisioning_wifi_ssid=$(prompt_value "PROVISIONING_WIFI_SSID" "Provisioning Wi-
 provisioning_wifi_password=$(prompt_value "PROVISIONING_WIFI_PASSWORD" "Provisioning Wi-Fi password" "$(env_current PROVISIONING_WIFI_PASSWORD)" false true)
 
 provisioning_scan_all=$(get_or_generate "PROVISIONING_SCAN_ALL" "false")
-provisioning_allow_nameless=$(get_or_generate "PROVISIONING_ALLOW_NAMELESS" "false")
+provisioning_allow_nameless=$(get_or_generate "PROVISIONING_ALLOW_NAMELESS" "true")
 backend_public_url=$(get_or_generate "BACKEND_PUBLIC_URL" "http://$actual_ip:3000")
 mqtt_public_host=$(get_or_generate "MQTT_PUBLIC_HOST" "$actual_ip")
 
