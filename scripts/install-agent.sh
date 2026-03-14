@@ -109,9 +109,22 @@ fi
 
 echo "Docker: $(docker --version)"
 
-# ── [2/5] download deployment files ──────────────────────────────────────────
+# ── [2/5] docker hub login ───────────────────────────────────────────────────
 
-log "[2/5] Downloading deployment files to $DEPLOY_DIR..."
+log "[2/5] Docker Hub credentials (needed to pull private images)..."
+
+cur_docker_user=$(env_current "$AGENT_DEST/.env" "DOCKER_USERNAME")
+cur_docker_token=$(env_current "$AGENT_DEST/.env" "DOCKER_TOKEN")
+
+docker_username=$(prompt_value "Docker Hub username" "${cur_docker_user:-}" true false)
+docker_token=$(prompt_value "Docker Hub token" "${cur_docker_token:-}" true true)
+
+echo "$docker_token" | docker login -u "$docker_username" --password-stdin
+echo "Docker Hub: logged in as $docker_username"
+
+# ── [3/5] download deployment files ──────────────────────────────────────────
+
+log "[3/5] Downloading deployment files to $DEPLOY_DIR..."
 
 mkdir -p "$DEPLOY_DIR/nginx/conf.d" "$DEPLOY_DIR/nginx/certs" "$DEPLOY_DIR/scripts"
 
@@ -155,13 +168,11 @@ log "[5/5] Configuring agent..."
 STACK_ENV="$DEPLOY_DIR/.env"
 
 stack_station_id=$(env_current "$STACK_ENV" "STATION_ID")
-cur_station_id=$(env_current "$AGENT_DEST/.env" "STATION_ID")
-cur_update_url=$(env_current "$AGENT_DEST/.env" "UPDATE_SERVER_URL")
-cur_interval=$(env_current "$AGENT_DEST/.env" "CHECK_INTERVAL_MINUTES")
-cur_auto=$(env_current "$AGENT_DEST/.env" "AUTO_UPDATE")
+cur_station_id=$(env_current  "$AGENT_DEST/.env" "STATION_ID")
+cur_update_url=$(env_current  "$AGENT_DEST/.env" "UPDATE_SERVER_URL")
+cur_interval=$(env_current    "$AGENT_DEST/.env" "CHECK_INTERVAL_MINUTES")
+cur_auto=$(env_current        "$AGENT_DEST/.env" "AUTO_UPDATE")
 cur_healthcheck=$(env_current "$AGENT_DEST/.env" "HEALTHCHECK_URL")
-cur_docker_user=$(env_current "$AGENT_DEST/.env" "DOCKER_USERNAME")
-cur_docker_token=$(env_current "$AGENT_DEST/.env" "DOCKER_TOKEN")
 cur_agent_token=$(env_current "$AGENT_DEST/.env" "AGENT_TOKEN")
 
 station_id=$(prompt_value "Station ID" "${cur_station_id:-${stack_station_id:-}}" true false)
@@ -169,8 +180,6 @@ update_url=$(prompt_value "Update manifest URL" "${cur_update_url:-https://raw.g
 check_interval=$(prompt_value "Check interval (minutes)" "${cur_interval:-60}" false false)
 auto_update=$(prompt_value "Auto update (true/false)" "${cur_auto:-true}" false false)
 healthcheck_url=$(prompt_value "Healthcheck URL" "${cur_healthcheck:-http://localhost/api/health}" false false)
-docker_username=$(prompt_value "Docker Hub username (optional)" "${cur_docker_user:-}" false false)
-docker_token=$(prompt_value "Docker Hub token (optional)" "${cur_docker_token:-}" false true)
 agent_token=$(prompt_value "Agent API token (optional, recommended)" "${cur_agent_token:-}" false true)
 
 cat > "$AGENT_DEST/.env" <<EOF
