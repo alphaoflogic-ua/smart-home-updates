@@ -57,8 +57,8 @@ services:
       - MQTT_PUBLIC_HOST=${MQTT_PUBLIC_HOST}
       # Debug Noble
       - DEBUG=noble*
-      # Ensure active scanning is requested at HCI level
-      - NOBLE_MULTI_ROLE=1
+      # Share HCI socket with bluetoothd so connection events are not intercepted
+      - NOBLE_REPORT_ALL_HCI_EVENTS=1
     depends_on:
       postgres:
         condition: service_healthy
