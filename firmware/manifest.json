@@ -1,9 +1,4 @@
 {
-  "climate": {
-    "version": "0.0.1",
-    "file": "esp32-climate@0.0.1.bin",
-    "checksum": "sha256:56a6176c44ed939960bac615a5d53a566e847e757f712bebd9b443fe408de9be"
-  },
   "esp32/climate": {
     "version": "0.0.1",
     "file": "esp32-climate@0.0.1.bin",
