@@ -2,6 +2,7 @@
 set -euo pipefail
 
 DEPLOY_DIR="${DEPLOY_DIR:-/opt/smart-home}"
+NEEDS_REBOOT=false
 
 echo "[1/7] Updating system packages..."
 sudo apt update
@@ -19,6 +20,31 @@ sudo systemctl disable bluetooth || true
 sudo systemctl stop bluetooth || true
 
 echo "[4/7] Configuring Bluetooth on host..."
+
+# Disable built-in Bluetooth so the USB dongle becomes hci0.
+# This avoids issues with the RPi's onboard BT and ensures noble always binds
+# to the external adapter at a stable hci0 index.
+BOOT_CONFIG=""
+for f in /boot/firmware/config.txt /boot/config.txt; do
+  if [ -f "$f" ]; then
+    BOOT_CONFIG="$f"
+    break
+  fi
+done
+
+if [ -n "$BOOT_CONFIG" ]; then
+  if ! grep -q "^dtoverlay=disable-bt" "$BOOT_CONFIG"; then
+    echo "Disabling onboard Bluetooth via $BOOT_CONFIG..."
+    echo "dtoverlay=disable-bt" | sudo tee -a "$BOOT_CONFIG" >/dev/null
+    NEEDS_REBOOT=true
+    echo "NOTE: Onboard BT will be disabled after reboot."
+  else
+    echo "Onboard Bluetooth already disabled in $BOOT_CONFIG"
+  fi
+else
+  echo "WARNING: Could not find boot config file to disable onboard Bluetooth"
+fi
+
 if command -v rfkill >/dev/null 2>&1; then
   echo "Unblocking Bluetooth via rfkill..."
   sudo rfkill unblock bluetooth || true
@@ -73,6 +99,15 @@ bluetoothctl --version || true
 
 echo
 echo "Host bootstrap completed."
+
+if [ "$NEEDS_REBOOT" = true ]; then
+  echo
+  echo "Onboard Bluetooth was disabled. Rebooting in 5 seconds so the USB dongle becomes hci0..."
+  echo "After reboot, run: ./scripts/deploy-station.sh"
+  sleep 5
+  sudo reboot
+fi
+
 echo "Starting a new shell with 'docker' group permissions..."
 exec newgrp docker <<EOM
   echo "Groups updated. You can now run: ./scripts/deploy-station.sh"
