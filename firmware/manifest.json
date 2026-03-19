@@ -7,6 +7,6 @@
   "esp32/climate": {
     "version": "0.0.1",
     "file": "esp32-climate@0.0.1.bin",
-    "checksum": "sha256:f1149ddf0cc4c15a1f46d116b7438b27e0d55d206c35e439ae67b9c3cdcf364f"
+    "checksum": "sha256:0840513d1ed9e9f7ec738309407416a7b424f47e155cc06fb0131113baa728e2"
   }
 }
