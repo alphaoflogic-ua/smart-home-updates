@@ -184,7 +184,7 @@ update_url=$(prompt_value "Update manifest URL" "${cur_update_url:-https://raw.g
 check_interval=$(prompt_value "Check interval (minutes)" "${cur_interval:-60}" false false)
 auto_update=$(prompt_value "Auto update (true/false)" "${cur_auto:-true}" false false)
 healthcheck_url=$(prompt_value "Healthcheck URL" "${cur_healthcheck:-http://localhost:3000/health}" false false)
-agent_token="${cur_agent_token:-$(LC_ALL=C tr -dc 'a-zA-Z0-9' </dev/urandom | head -c 32)}"
+agent_token="${cur_agent_token:-$(openssl rand -hex 16)}"
 
 cat > "$AGENT_DEST/.env" <<EOF
 STATION_ID='$station_id'
