@@ -13,11 +13,10 @@ curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
 sudo sh /tmp/get-docker.sh
 
 echo "[3/7] Installing Bluetooth and system dependencies..."
-sudo apt install -y bluez util-linux rfkill
-# bluetoothd is NOT started — noble (inside Docker) uses raw HCI socket directly
-# and bluetoothd interferes with BLE connect and GATT operations
-sudo systemctl disable bluetooth || true
-sudo systemctl stop bluetooth || true
+sudo apt install -y bluez util-linux rfkill dbus
+# bluetoothd must be running — noble uses D-Bus/BlueZ for BLE operations
+sudo systemctl enable bluetooth
+sudo systemctl start bluetooth || true
 
 echo "[4/7] Configuring Bluetooth on host..."
 
@@ -50,29 +49,11 @@ if command -v rfkill >/dev/null 2>&1; then
   sudo rfkill unblock bluetooth || true
 fi
 
-# noble uses HCI_CHANNEL_USER inside Docker, which requires hci0 to be DOWN on the host.
-# In HCI_CHANNEL_USER mode, noble fully owns the HCI device and initialises it itself
-# via HCI Reset — the kernel sends no automatic HCI commands (e.g. LE Read Remote Used Features)
-# that would otherwise delay GATT by ~288ms and cause ESP32 provisioning to time out.
-# Remove any legacy hci0-up.service that brings the adapter up (this would conflict).
-if systemctl is-enabled hci0-up.service >/dev/null 2>&1; then
-  echo "Disabling legacy hci0-up.service (incompatible with HCI_CHANNEL_USER)..."
-  sudo systemctl disable hci0-up.service || true
-  sudo systemctl stop hci0-up.service || true
-fi
-sudo rm -f /etc/systemd/system/hci0-up.service
-sudo systemctl daemon-reload
-
-# Ensure hci0 is DOWN so noble can claim it via HCI_CHANNEL_USER
-if command -v hciconfig >/dev/null 2>&1; then
-  echo "Ensuring hci0 is down (noble will initialise it)..."
-  sudo hciconfig hci0 down 2>/dev/null || true
-fi
-
+# BlueZ manages the adapter via D-Bus — noble connects through bluetoothd.
 if [ -d "/sys/class/bluetooth/hci0" ]; then
   echo "Bluetooth adapter hci0 detected"
 else
-  echo "WARNING: Bluetooth adapter hci0 not detected! Please ensure a Bluetooth adapter is plugged in."
+  echo "WARNING: Bluetooth adapter hci0 not detected! Please ensure a USB Bluetooth dongle is plugged in."
 fi
 
 echo "[5/7] Installing Docker Compose plugin..."

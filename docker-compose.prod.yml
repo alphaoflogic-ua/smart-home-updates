@@ -6,16 +6,12 @@ services:
     network_mode: host
 
   backend:
-    privileged: true
     network_mode: host
     volumes:
       - /var/run/dbus:/var/run/dbus
     environment:
       - DB_HOST=127.0.0.1
       - MQTT_URL=mqtt://127.0.0.1:1883
-      # Debug Noble
-      - DEBUG=noble*
-      - NOBLE_MULTI_ROLE=1
 
   frontend:
     network_mode: host

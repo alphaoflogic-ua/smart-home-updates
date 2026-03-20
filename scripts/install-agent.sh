@@ -95,9 +95,9 @@ if ! command -v docker >/dev/null 2>&1; then
   curl -fsSL https://get.docker.com | sudo sh
   sudo apt-get install -y docker-compose-plugin bluez util-linux rfkill
   sudo systemctl enable --now docker
-  sudo systemctl disable bluetooth 2>/dev/null || true
-  sudo systemctl stop bluetooth 2>/dev/null || true
   sudo rfkill unblock bluetooth 2>/dev/null || true
+  sudo systemctl enable bluetooth 2>/dev/null || true
+  sudo systemctl start bluetooth 2>/dev/null || true
   sudo usermod -aG docker "$USER"
   log "Docker installed. Re-running in docker group context..."
   exec newgrp docker "$0" "$@"
