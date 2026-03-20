@@ -157,6 +157,7 @@ jwt_refresh_expires_in=$(get_or_generate "JWT_REFRESH_EXPIRES_IN" "7d")
 provisioning_wifi_ssid=$(prompt_value "PROVISIONING_WIFI_SSID" "Provisioning Wi-Fi SSID" "$(env_current PROVISIONING_WIFI_SSID)" false false)
 provisioning_wifi_password=$(prompt_value "PROVISIONING_WIFI_PASSWORD" "Provisioning Wi-Fi password" "$(env_current PROVISIONING_WIFI_PASSWORD)" false true)
 
+agent_token=$(get_or_generate "AGENT_TOKEN" "" "secret")
 provisioning_scan_all=$(get_or_generate "PROVISIONING_SCAN_ALL" "false")
 provisioning_allow_nameless=$(get_or_generate "PROVISIONING_ALLOW_NAMELESS" "true")
 backend_public_url=$(get_or_generate "BACKEND_PUBLIC_URL" "http://$actual_ip:3000")
@@ -179,6 +180,7 @@ PROVISIONING_SCAN_ALL='$provisioning_scan_all'
 PROVISIONING_ALLOW_NAMELESS='$provisioning_allow_nameless'
 PROVISIONING_SERVICE_UUID='$PROVISIONING_SERVICE_UUID'
 PROVISIONING_CHARACTERISTIC_UUID='$PROVISIONING_CHARACTERISTIC_UUID'
+AGENT_TOKEN='$agent_token'
 BACKEND_PUBLIC_URL='$backend_public_url'
 MQTT_PUBLIC_HOST='$mqtt_public_host'
 EOF

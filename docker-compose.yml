@@ -54,6 +54,7 @@ services:
       - JWT_REFRESH_EXPIRES_IN=${JWT_REFRESH_EXPIRES_IN:-7d}
       - BACKEND_PUBLIC_URL=${BACKEND_PUBLIC_URL}
       - MQTT_PUBLIC_HOST=${MQTT_PUBLIC_HOST}
+      - AGENT_TOKEN=${AGENT_TOKEN:-}
       - DBUS_SYSTEM_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket
     depends_on:
       postgres:

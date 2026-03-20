@@ -176,6 +176,8 @@ cur_interval=$(env_current    "$AGENT_DEST/.env" "CHECK_INTERVAL_MINUTES")
 cur_auto=$(env_current        "$AGENT_DEST/.env" "AUTO_UPDATE")
 cur_healthcheck=$(env_current "$AGENT_DEST/.env" "HEALTHCHECK_URL")
 cur_agent_token=$(env_current "$AGENT_DEST/.env" "AGENT_TOKEN")
+cur_backend_agent_token=$(env_current "$AGENT_DEST/.env" "BACKEND_AGENT_TOKEN")
+stack_agent_token=$(env_current "$STACK_ENV" "AGENT_TOKEN")
 
 station_id=$(prompt_value "Station ID" "${cur_station_id:-${stack_station_id:-}}" true false)
 update_url=$(prompt_value "Update manifest URL" "${cur_update_url:-https://raw.githubusercontent.com/alphaoflogic-ua/smart-home-updates/main/release.json}" true false)
@@ -197,6 +199,9 @@ DATA_DIR='$AGENT_DATA_DIR'
 DOCKER_USERNAME='$docker_username'
 DOCKER_TOKEN='$docker_token'
 AGENT_TOKEN='$agent_token'
+BACKEND_AGENT_TOKEN='${cur_backend_agent_token:-$stack_agent_token}'
+BACKEND_URL='http://localhost:3000'
+FIRMWARE_MANIFEST_URL='https://raw.githubusercontent.com/alphaoflogic-ua/smart-home-updates/main/firmware/manifest.json'
 EOF
 
 sudo tee /etc/systemd/system/${SERVICE_NAME}.service > /dev/null <<EOF
