@@ -8,5 +8,15 @@
     "version": "0.1.5",
     "file": "esp32-pir@0.1.5.bin",
     "checksum": "sha256:7f31c062c1b2a2e5c3ac54588362ca025ef4e78685ae89c823799a6598b71be5"
+  },
+  "esp32/climate": {
+    "version": "0.1.6",
+    "file": "esp32-climate@0.1.6.bin",
+    "checksum": "sha256:fd0db0d05dadd7ba90deb005db0ec8616d1ae103a18788e200c681718c420df2"
+  },
+  "esp32/pir": {
+    "version": "0.1.6",
+    "file": "esp32-pir@0.1.6.bin",
+    "checksum": "sha256:fed18c014c77c0eff2a621cd39c9792f48a02c3c48b46ebdea05ed50ee700c99"
   }
 }
