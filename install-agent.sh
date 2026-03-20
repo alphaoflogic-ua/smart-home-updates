@@ -199,7 +199,7 @@ DATA_DIR='$AGENT_DATA_DIR'
 DOCKER_USERNAME='$docker_username'
 DOCKER_TOKEN='$docker_token'
 AGENT_TOKEN='$agent_token'
-BACKEND_AGENT_TOKEN='${cur_backend_agent_token:-$stack_agent_token}'
+BACKEND_AGENT_TOKEN='${stack_agent_token:-$cur_backend_agent_token}'
 BACKEND_URL='http://localhost:3000'
 FIRMWARE_MANIFEST_URL='https://raw.githubusercontent.com/alphaoflogic-ua/smart-home-updates/main/firmware/manifest.json'
 EOF
