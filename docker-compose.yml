@@ -79,6 +79,7 @@ services:
     network_mode: host
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d
+      - ~/firmware-cache:/firmware-cache:ro
     depends_on:
       - backend
       - frontend
