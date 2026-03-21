@@ -163,6 +163,8 @@ sudo chmod +x "$AGENT_DEST/station-agent"
 sudo chown -R "$USER":"$USER" "$AGENT_DEST"
 sudo chown -R "$USER":"$USER" "$AGENT_DATA_DIR"
 
+mkdir -p "$HOME/firmware-cache"
+
 # ── [5/5] configure .env + systemd ───────────────────────────────────────────
 
 log "[5/5] Configuring agent..."
@@ -226,6 +228,14 @@ StandardError=journal
 [Install]
 WantedBy=multi-user.target
 EOF
+
+# Seed current version so agent doesn't re-download on first check
+RELEASE_JSON_URL=$(echo "$update_url" | sed 's/[[:space:]]*$//')
+CURRENT_VER=$(curl -fsSL "$RELEASE_JSON_URL" 2>/dev/null | grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | cut -d'"' -f4 || true)
+if [ -n "$CURRENT_VER" ]; then
+  echo "$CURRENT_VER" > "$AGENT_DATA_DIR/current_version.txt"
+  log "Seeded current version: $CURRENT_VER"
+fi
 
 sudo systemctl daemon-reload
 sudo systemctl enable "$SERVICE_NAME"
