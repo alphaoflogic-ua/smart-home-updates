@@ -18,6 +18,7 @@ echo "  - systemd service: $SERVICE_NAME"
 echo "  - agent files:     $AGENT_DEST"
 echo "  - agent data:      $AGENT_DATA_DIR"
 echo "  - stack:           $DEPLOY_DIR (docker compose down -v)"
+echo "  - firmware cache:  ~/firmware-cache"
 echo "  - docker images:   all unused images"
 echo ""
 read -rp "Continue? [y/N]: " confirm < /dev/tty
@@ -37,6 +38,7 @@ sudo systemctl daemon-reload
 echo "Removing agent files..."
 sudo rm -rf "$AGENT_DEST"
 sudo rm -rf "$AGENT_DATA_DIR"
+rm -rf "${HOME}/firmware-cache"
 
 # stop and remove stack
 if [ -f "$DEPLOY_DIR/docker-compose.yml" ]; then
