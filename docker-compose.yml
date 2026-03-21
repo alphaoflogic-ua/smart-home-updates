@@ -29,6 +29,7 @@ services:
     network_mode: host
     volumes:
       - /var/run/dbus:/var/run/dbus
+      - ~/firmware-cache:/firmware-cache:ro
     environment:
       - DB_HOST=127.0.0.1
       - DB_PORT=5432
