@@ -163,7 +163,9 @@ sudo chmod +x "$AGENT_DEST/station-agent"
 sudo chown -R "$USER":"$USER" "$AGENT_DEST"
 sudo chown -R "$USER":"$USER" "$AGENT_DATA_DIR"
 
-mkdir -p "$HOME/firmware-cache"
+FIRMWARE_CACHE_DIR="$HOME/firmware-cache"
+mkdir -p "$FIRMWARE_CACHE_DIR"
+chown "$USER":"$USER" "$FIRMWARE_CACHE_DIR"
 
 # ── [5/5] configure .env + systemd ───────────────────────────────────────────
 
@@ -204,6 +206,7 @@ DOCKER_TOKEN='$docker_token'
 AGENT_API_TOKEN='$agent_token'
 BACKEND_AGENT_TOKEN='${stack_agent_token:-$cur_backend_agent_token}'
 BACKEND_URL='http://localhost:3000'
+FIRMWARE_CACHE_DIR='$FIRMWARE_CACHE_DIR'
 FIRMWARE_MANIFEST_URL='https://raw.githubusercontent.com/alphaoflogic-ua/smart-home-updates/main/firmware/manifest.json'
 EOF
 
