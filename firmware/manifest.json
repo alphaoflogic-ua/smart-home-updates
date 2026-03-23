@@ -1,8 +1,8 @@
 {
   "esp32-climate": {
-    "version": "0.1.18",
-    "file": "esp32-climate@0.1.18.bin",
-    "checksum": "sha256:aa8fe216c27ac337143f91499a12321ce53773225b961b7f8312925ec2afc087"
+    "version": "0.1.19",
+    "file": "esp32-climate@0.1.19.bin",
+    "checksum": "sha256:231c63570316fbe05dc70140e7385295c1934a103fe2137b10ed12d42e2b8c7e"
   },
   "esp32-pir": {
     "version": "0.1.18",
