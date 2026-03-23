@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# ── resolve real user (even when run via sudo) ────────────────────────────────
+
+if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
+  REAL_USER="$SUDO_USER"
+  REAL_HOME=$(eval echo "~$SUDO_USER")
+else
+  REAL_USER="$USER"
+  REAL_HOME="$HOME"
+fi
+
 # ── config ────────────────────────────────────────────────────────────────────
 
 UPDATES_REPO="${UPDATES_REPO:-alphaoflogic-ua/smart-home-updates}"
@@ -10,7 +20,7 @@ BINARY_URL="https://raw.githubusercontent.com/${UPDATES_REPO}/${BRANCH}/station-
 
 AGENT_DEST="${AGENT_DEST:-/opt/station-agent}"
 AGENT_DATA_DIR="${AGENT_DATA_DIR:-/var/lib/station-agent}"
-DEPLOY_DIR="${DEPLOY_DIR:-${HOME}/smart-home}"
+DEPLOY_DIR="${DEPLOY_DIR:-${REAL_HOME}/smart-home}"
 SERVICE_NAME="station-agent"
 
 # ── guard: needs a real TTY for interactive prompts ───────────────────────────
@@ -98,13 +108,13 @@ if ! command -v docker >/dev/null 2>&1; then
   sudo rfkill unblock bluetooth 2>/dev/null || true
   sudo systemctl enable bluetooth 2>/dev/null || true
   sudo systemctl start bluetooth 2>/dev/null || true
-  sudo usermod -aG docker "$USER"
+  sudo usermod -aG docker "$REAL_USER"
   log "Docker installed. Re-running in docker group context..."
   exec newgrp docker "$0" "$@"
 fi
 
 if ! docker ps >/dev/null 2>&1; then
-  sudo usermod -aG docker "$USER"
+  sudo usermod -aG docker "$REAL_USER"
   log "Re-running in docker group context..."
   exec newgrp docker "$0" "$@"
 fi
@@ -160,12 +170,12 @@ sudo mkdir -p "$AGENT_DATA_DIR"
 curl -fsSL "$BINARY_URL" | sudo tee "$AGENT_DEST/station-agent" > /dev/null
 sudo chmod +x "$AGENT_DEST/station-agent"
 
-sudo chown -R "$USER":"$USER" "$AGENT_DEST"
-sudo chown -R "$USER":"$USER" "$AGENT_DATA_DIR"
+sudo chown -R "$REAL_USER":"$REAL_USER" "$AGENT_DEST"
+sudo chown -R "$REAL_USER":"$REAL_USER" "$AGENT_DATA_DIR"
 
-FIRMWARE_CACHE_DIR="$HOME/firmware-cache"
+FIRMWARE_CACHE_DIR="$REAL_HOME/firmware-cache"
 mkdir -p "$FIRMWARE_CACHE_DIR"
-chown "$USER":"$USER" "$FIRMWARE_CACHE_DIR"
+chown "$REAL_USER":"$REAL_USER" "$FIRMWARE_CACHE_DIR"
 
 # ── [5/5] configure .env + systemd ───────────────────────────────────────────
 
@@ -219,7 +229,7 @@ Requires=docker.service
 
 [Service]
 Type=simple
-User=$USER
+User=$REAL_USER
 WorkingDirectory=$AGENT_DEST
 EnvironmentFile=$AGENT_DEST/.env
 ExecStart=$AGENT_DEST/station-agent
