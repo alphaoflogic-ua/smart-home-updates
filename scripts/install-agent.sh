@@ -246,7 +246,7 @@ EOF
 RELEASE_JSON_URL=$(echo "$update_url" | sed 's/[[:space:]]*$//')
 CURRENT_VER=$(curl -fsSL "$RELEASE_JSON_URL" 2>/dev/null | grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | cut -d'"' -f4 || true)
 if [ -n "$CURRENT_VER" ]; then
-  echo "$CURRENT_VER" > "$AGENT_DATA_DIR/current_version.txt"
+  echo "$CURRENT_VER" | sudo -u "$REAL_USER" tee "$AGENT_DATA_DIR/current_version.txt" > /dev/null
   log "Seeded current version: $CURRENT_VER"
 fi
 
