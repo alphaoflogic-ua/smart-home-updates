@@ -163,6 +163,11 @@ provisioning_allow_nameless=$(get_or_generate "PROVISIONING_ALLOW_NAMELESS" "tru
 backend_public_url=$(get_or_generate "BACKEND_PUBLIC_URL" "http://$actual_ip:3000")
 mqtt_public_host=$(get_or_generate "MQTT_PUBLIC_HOST" "$actual_ip")
 
+email_provider=$(prompt_value "EMAIL_PROVIDER" "Email provider (console/resend)" "$(env_current EMAIL_PROVIDER)" false false)
+email_provider="${email_provider:-console}"
+resend_api_key=$(prompt_value "RESEND_API_KEY" "Resend API key (Enter to skip)" "$(env_current RESEND_API_KEY)" false true)
+email_from=$(prompt_value "EMAIL_FROM" "Email from address" "$(env_current EMAIL_FROM)" false false)
+
 cat > .env <<EOF
 STATION_ID='$station_id'
 DB_USER='$db_user'
@@ -183,6 +188,9 @@ PROVISIONING_CHARACTERISTIC_UUID='$PROVISIONING_CHARACTERISTIC_UUID'
 AGENT_TOKEN='$agent_token'
 BACKEND_PUBLIC_URL='$backend_public_url'
 MQTT_PUBLIC_HOST='$mqtt_public_host'
+EMAIL_PROVIDER='$email_provider'
+RESEND_API_KEY='$resend_api_key'
+EMAIL_FROM='$email_from'
 EOF
 
 echo "Saved configuration to .env"
