@@ -8,9 +8,19 @@ if [ ! -t 0 ] && [ -z "${_RESET_REEXEC:-}" ]; then
   _RESET_REEXEC=1 exec bash "$TMP" "$@" < /dev/tty
 fi
 
+# ── resolve real user (even when run via sudo) ────────────────────────────────
+if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
+  REAL_USER="$SUDO_USER"
+  REAL_HOME=$(eval echo "~$SUDO_USER")
+else
+  REAL_USER="$USER"
+  REAL_HOME="$HOME"
+fi
+
 AGENT_DEST="${AGENT_DEST:-/opt/station-agent}"
 AGENT_DATA_DIR="${AGENT_DATA_DIR:-/var/lib/station-agent}"
-DEPLOY_DIR="${DEPLOY_DIR:-${HOME}/smart-home}"
+DEPLOY_DIR="${DEPLOY_DIR:-${REAL_HOME}/smart-home}"
+FIRMWARE_CACHE_DIR="${REAL_HOME}/firmware-cache"
 SERVICE_NAME="station-agent"
 
 echo "This will remove:"
@@ -18,7 +28,7 @@ echo "  - systemd service: $SERVICE_NAME"
 echo "  - agent files:     $AGENT_DEST"
 echo "  - agent data:      $AGENT_DATA_DIR"
 echo "  - stack:           $DEPLOY_DIR (docker compose down -v)"
-echo "  - firmware cache:  ~/firmware-cache"
+echo "  - firmware cache:  $FIRMWARE_CACHE_DIR"
 echo "  - docker images:   all unused images"
 echo ""
 read -rp "Continue? [y/N]: " confirm < /dev/tty
@@ -38,21 +48,21 @@ sudo systemctl daemon-reload
 echo "Removing agent files..."
 sudo rm -rf "$AGENT_DEST"
 sudo rm -rf "$AGENT_DATA_DIR"
-rm -rf "${HOME}/firmware-cache"
+sudo rm -rf "$FIRMWARE_CACHE_DIR"
 
 # stop and remove stack
 if [ -f "$DEPLOY_DIR/docker-compose.yml" ]; then
   echo "Stopping stack..."
-  docker compose -f "$DEPLOY_DIR/docker-compose.yml" down -v 2>/dev/null || true
+  sudo docker compose -f "$DEPLOY_DIR/docker-compose.yml" down -v 2>/dev/null || true
 fi
 
 echo "Removing deployment dir..."
-rm -rf "$DEPLOY_DIR"
+sudo rm -rf "$DEPLOY_DIR"
 
 # clean docker
 echo "Pruning docker images..."
-docker system prune -af 2>/dev/null || true
+sudo docker system prune -af 2>/dev/null || true
 
 echo ""
 echo "Done. Ready for fresh install:"
-echo "  curl -fsSL https://raw.githubusercontent.com/alphaoflogic-ua/smart-home-updates/main/install-agent.sh | bash"
+echo "  curl -fsSL https://raw.githubusercontent.com/alphaoflogic-ua/smart-home-updates/main/install-agent.sh | sudo bash"
