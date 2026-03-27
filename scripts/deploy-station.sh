@@ -138,7 +138,7 @@ get_or_generate() {
   echo "$value"
 }
 
-echo "Configuration (Wi-Fi settings are interactive)"
+echo "Generating configuration..."
 
 # Logic to determine actual IPs before environment generation
 actual_ip=$(get_local_ip)
@@ -154,19 +154,11 @@ jwt_refresh_secret=$(get_or_generate "JWT_REFRESH_SECRET" "" "secret")
 jwt_expires_in=$(get_or_generate "JWT_EXPIRES_IN" "1h")
 jwt_refresh_expires_in=$(get_or_generate "JWT_REFRESH_EXPIRES_IN" "7d")
 
-provisioning_wifi_ssid=$(prompt_value "PROVISIONING_WIFI_SSID" "Provisioning Wi-Fi SSID" "$(env_current PROVISIONING_WIFI_SSID)" false false)
-provisioning_wifi_password=$(prompt_value "PROVISIONING_WIFI_PASSWORD" "Provisioning Wi-Fi password" "$(env_current PROVISIONING_WIFI_PASSWORD)" false true)
-
 agent_token=$(get_or_generate "AGENT_TOKEN" "" "secret")
 provisioning_scan_all=$(get_or_generate "PROVISIONING_SCAN_ALL" "false")
 provisioning_allow_nameless=$(get_or_generate "PROVISIONING_ALLOW_NAMELESS" "true")
 backend_public_url=$(get_or_generate "BACKEND_PUBLIC_URL" "http://$actual_ip:3000")
 mqtt_public_host=$(get_or_generate "MQTT_PUBLIC_HOST" "$actual_ip")
-
-email_provider=$(prompt_value "EMAIL_PROVIDER" "Email provider (console/resend)" "$(env_current EMAIL_PROVIDER)" false false)
-email_provider="${email_provider:-console}"
-resend_api_key=$(prompt_value "RESEND_API_KEY" "Resend API key (Enter to skip)" "$(env_current RESEND_API_KEY)" false true)
-email_from=$(prompt_value "EMAIL_FROM" "Email from address" "$(env_current EMAIL_FROM)" false false)
 
 cat > .env <<EOF
 STATION_ID='$station_id'
@@ -179,8 +171,6 @@ JWT_SECRET='$jwt_secret'
 JWT_REFRESH_SECRET='$jwt_refresh_secret'
 JWT_EXPIRES_IN='$jwt_expires_in'
 JWT_REFRESH_EXPIRES_IN='$jwt_refresh_expires_in'
-PROVISIONING_WIFI_SSID='$provisioning_wifi_ssid'
-PROVISIONING_WIFI_PASSWORD='$provisioning_wifi_password'
 PROVISIONING_SCAN_ALL='$provisioning_scan_all'
 PROVISIONING_ALLOW_NAMELESS='$provisioning_allow_nameless'
 PROVISIONING_SERVICE_UUID='$PROVISIONING_SERVICE_UUID'
@@ -188,9 +178,6 @@ PROVISIONING_CHARACTERISTIC_UUID='$PROVISIONING_CHARACTERISTIC_UUID'
 AGENT_TOKEN='$agent_token'
 BACKEND_PUBLIC_URL='$backend_public_url'
 MQTT_PUBLIC_HOST='$mqtt_public_host'
-EMAIL_PROVIDER='$email_provider'
-RESEND_API_KEY='$resend_api_key'
-EMAIL_FROM='$email_from'
 EOF
 
 echo "Saved configuration to .env"
