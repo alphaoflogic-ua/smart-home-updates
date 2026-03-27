@@ -169,6 +169,8 @@ sudo mkdir -p "$AGENT_DATA_DIR"
 
 curl -fsSL "$BINARY_URL" | sudo tee "$AGENT_DEST/station-agent" > /dev/null
 sudo chmod +x "$AGENT_DEST/station-agent"
+# Allow binding to port 80 for captive portal (runs as non-root user)
+sudo setcap cap_net_bind_service=+ep "$AGENT_DEST/station-agent"
 
 sudo chown -R "$REAL_USER":"$REAL_USER" "$AGENT_DEST"
 sudo chown -R "$REAL_USER":"$REAL_USER" "$AGENT_DATA_DIR"
@@ -235,6 +237,7 @@ EnvironmentFile=$AGENT_DEST/.env
 ExecStart=$AGENT_DEST/station-agent
 Restart=always
 RestartSec=15
+AmbientCapabilities=CAP_NET_BIND_SERVICE
 StandardOutput=journal
 StandardError=journal
 
