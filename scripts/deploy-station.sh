@@ -159,6 +159,13 @@ provisioning_scan_all=$(get_or_generate "PROVISIONING_SCAN_ALL" "false")
 provisioning_allow_nameless=$(get_or_generate "PROVISIONING_ALLOW_NAMELESS" "true")
 backend_public_url=$(get_or_generate "BACKEND_PUBLIC_URL" "http://$actual_ip:3000")
 mqtt_public_host=$(get_or_generate "MQTT_PUBLIC_HOST" "$actual_ip")
+# Resolve real user home (even when run via sudo)
+if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
+  _real_home=$(eval echo "~$SUDO_USER")
+else
+  _real_home="$HOME"
+fi
+firmware_cache_dir=$(get_or_generate "FIRMWARE_CACHE_DIR" "${_real_home}/firmware-cache")
 
 cat > .env <<EOF
 STATION_ID='$station_id'
@@ -178,6 +185,7 @@ PROVISIONING_CHARACTERISTIC_UUID='$PROVISIONING_CHARACTERISTIC_UUID'
 AGENT_TOKEN='$agent_token'
 BACKEND_PUBLIC_URL='$backend_public_url'
 MQTT_PUBLIC_HOST='$mqtt_public_host'
+FIRMWARE_CACHE_DIR='$firmware_cache_dir'
 EOF
 
 echo "Saved configuration to .env"

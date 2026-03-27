@@ -158,6 +158,11 @@ if [ ! -f "$DEPLOY_DIR/.env" ]; then
   bash "$DEPLOY_DIR/scripts/deploy-station.sh"
 else
   log "Stack already configured — skipping."
+  # Ensure FIRMWARE_CACHE_DIR is set (added in v0.2.10+)
+  if ! grep -q '^FIRMWARE_CACHE_DIR=' "$DEPLOY_DIR/.env"; then
+    echo "FIRMWARE_CACHE_DIR='${REAL_HOME}/firmware-cache'" >> "$DEPLOY_DIR/.env"
+    log "Added FIRMWARE_CACHE_DIR to stack .env"
+  fi
 fi
 
 # ── [4/5] install agent binary ────────────────────────────────────────────────
