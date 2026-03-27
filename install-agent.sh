@@ -190,7 +190,6 @@ cur_station_id=$(env_current  "$AGENT_DEST/.env" "STATION_ID")
 cur_update_url=$(env_current  "$AGENT_DEST/.env" "UPDATE_SERVER_URL")
 cur_interval=$(env_current    "$AGENT_DEST/.env" "CHECK_INTERVAL_MINUTES")
 cur_auto=$(env_current        "$AGENT_DEST/.env" "AUTO_UPDATE")
-cur_healthcheck=$(env_current "$AGENT_DEST/.env" "HEALTHCHECK_URL")
 cur_agent_token=$(env_current "$AGENT_DEST/.env" "AGENT_API_TOKEN")
 [ -z "$cur_agent_token" ] && cur_agent_token=$(env_current "$AGENT_DEST/.env" "AGENT_TOKEN")
 cur_backend_agent_token=$(env_current "$AGENT_DEST/.env" "BACKEND_AGENT_TOKEN")
@@ -200,7 +199,6 @@ station_id=$(prompt_value "Station ID" "${cur_station_id:-${stack_station_id:-}}
 update_url=$(prompt_value "Update manifest URL" "${cur_update_url:-https://raw.githubusercontent.com/alphaoflogic-ua/smart-home-updates/main/release.json}" true false)
 check_interval=$(prompt_value "Check interval (minutes)" "${cur_interval:-60}" false false)
 auto_update=$(prompt_value "Auto update (true/false)" "${cur_auto:-true}" false false)
-healthcheck_url=$(prompt_value "Healthcheck URL" "${cur_healthcheck:-http://localhost:3000/health}" false false)
 agent_token="${cur_agent_token:-$(openssl rand -hex 16)}"
 
 cat > "$AGENT_DEST/.env" <<EOF
@@ -211,7 +209,7 @@ AUTO_UPDATE='$auto_update'
 BOOTSTRAP_ON_START='true'
 COMPOSE_PROJECT_PATH='$DEPLOY_DIR'
 COMPOSE_FILE='docker-compose.yml'
-HEALTHCHECK_URL='$healthcheck_url'
+HEALTHCHECK_URL='${cur_healthcheck:-http://localhost:3000/health}'
 DATA_DIR='$AGENT_DATA_DIR'
 DOCKER_USERNAME='$docker_username'
 DOCKER_TOKEN='$docker_token'
