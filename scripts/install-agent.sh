@@ -148,6 +148,9 @@ download "scripts/deploy-station.sh" "$DEPLOY_DIR/scripts/deploy-station.sh"
 
 chmod +x "$DEPLOY_DIR/scripts/bootstrap-host.sh" "$DEPLOY_DIR/scripts/deploy-station.sh"
 
+# Ensure deploy dir is owned by the real user so the agent can sync compose files
+chown -R "$REAL_USER":"$REAL_USER" "$DEPLOY_DIR"
+
 # ── [3/5] stack setup (first time) ───────────────────────────────────────────
 
 log "[3/5] Checking station stack..."
