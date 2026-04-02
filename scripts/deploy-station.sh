@@ -69,8 +69,8 @@ prompt_value() {
 }
 
 # Static UUIDs for provisioning - do not change these as they are matched in firmware
-PROVISIONING_SERVICE_UUID='12345678-1234-1234-1234-1234567890ab'
-PROVISIONING_CHARACTERISTIC_UUID='abcdefab-1234-5678-9abc-def012345678'
+PROVISIONING_SERVICE_UUID='12c158d5-220f-4be9-b46a-a235f44c412a'
+PROVISIONING_CHARACTERISTIC_UUID='85e4cb5a-4718-47e3-b363-b2d82655ee1e'
 
 generate_uuid() {
   if command -v uuidgen >/dev/null 2>&1; then
