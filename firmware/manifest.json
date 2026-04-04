@@ -1,17 +1,17 @@
 {
   "esp32-climate": {
-    "version": "0.1.25",
-    "file": "esp32-climate@0.1.25.bin",
-    "checksum": "sha256:f0e068c7ede3a5464015529945c041a18d9fb5f2434a6df10296e66479631042"
+    "version": "0.1.26",
+    "file": "esp32-climate@0.1.26.bin",
+    "checksum": "sha256:5fed6836ad01735519ea6c9498e3b51cca85ad22c049b511923c2978c393f565"
   },
   "esp32-pir": {
-    "version": "0.1.25",
-    "file": "esp32-pir@0.1.25.bin",
-    "checksum": "sha256:8ffc46ed5b928ac28e1ef008c73858cac6975a98a81896d1c2169d31997b6718"
+    "version": "0.1.26",
+    "file": "esp32-pir@0.1.26.bin",
+    "checksum": "sha256:8c0abcee66d257ee133101cb385b04a06ee9129f2b64dbe1f6466ebda9712072"
   },
   "esp32-switch-pir": {
-    "version": "0.1.25",
-    "file": "esp32-switch-pir@0.1.25.bin",
-    "checksum": "sha256:0ef39899d536b9fb83cc9f2cdd42143898fded675d6b4f57ca0e6a9ee7c5ecf8"
+    "version": "0.1.26",
+    "file": "esp32-switch-pir@0.1.26.bin",
+    "checksum": "sha256:65e8773e7ea5d7a2a5c8dc542d700610b9e93dadfb7761b5914e804174869d6f"
   }
 }
