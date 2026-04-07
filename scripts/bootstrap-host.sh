@@ -20,9 +20,7 @@ sudo systemctl start bluetooth || true
 
 echo "[4/7] Configuring Bluetooth on host..."
 
-# Disable built-in Bluetooth so the USB dongle becomes hci0.
-# This avoids issues with the RPi's onboard BT and ensures noble always binds
-# to the external adapter at a stable hci0 index.
+# Re-enable built-in Bluetooth if it was previously disabled (e.g. for a USB dongle).
 BOOT_CONFIG=""
 for f in /boot/firmware/config.txt /boot/config.txt; do
   if [ -f "$f" ]; then
@@ -31,17 +29,11 @@ for f in /boot/firmware/config.txt /boot/config.txt; do
   fi
 done
 
-if [ -n "$BOOT_CONFIG" ]; then
-  if ! grep -q "^dtoverlay=disable-bt" "$BOOT_CONFIG"; then
-    echo "Disabling onboard Bluetooth via $BOOT_CONFIG..."
-    echo "dtoverlay=disable-bt" | sudo tee -a "$BOOT_CONFIG" >/dev/null
-    NEEDS_REBOOT=true
-    echo "NOTE: Onboard BT will be disabled after reboot."
-  else
-    echo "Onboard Bluetooth already disabled in $BOOT_CONFIG"
-  fi
-else
-  echo "WARNING: Could not find boot config file to disable onboard Bluetooth"
+if [ -n "$BOOT_CONFIG" ] && grep -q "^dtoverlay=disable-bt" "$BOOT_CONFIG"; then
+  echo "Re-enabling onboard Bluetooth (removing dtoverlay=disable-bt from $BOOT_CONFIG)..."
+  sudo sed -i '/^dtoverlay=disable-bt/d' "$BOOT_CONFIG"
+  NEEDS_REBOOT=true
+  echo "NOTE: Onboard BT will be enabled after reboot."
 fi
 
 if command -v rfkill >/dev/null 2>&1; then
@@ -49,11 +41,10 @@ if command -v rfkill >/dev/null 2>&1; then
   sudo rfkill unblock bluetooth || true
 fi
 
-# BlueZ manages the adapter via D-Bus — noble connects through bluetoothd.
 if [ -d "/sys/class/bluetooth/hci0" ]; then
   echo "Bluetooth adapter hci0 detected"
 else
-  echo "WARNING: Bluetooth adapter hci0 not detected! Please ensure a USB Bluetooth dongle is plugged in."
+  echo "WARNING: Bluetooth adapter hci0 not detected. It should appear after reboot."
 fi
 
 echo "[5/7] Installing Docker Compose plugin..."
@@ -83,7 +74,7 @@ echo "Host bootstrap completed."
 
 if [ "$NEEDS_REBOOT" = true ]; then
   echo
-  echo "Onboard Bluetooth was disabled. Rebooting in 5 seconds so the USB dongle becomes hci0..."
+  echo "Bluetooth config changed. Rebooting in 5 seconds to apply..."
   echo "After reboot, run: ./scripts/deploy-station.sh"
   sleep 5
   sudo reboot
