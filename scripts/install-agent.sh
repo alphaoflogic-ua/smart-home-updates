@@ -121,6 +121,18 @@ fi
 
 echo "Docker: $(docker --version)"
 
+# ── hostname for mDNS ─────────────────────────────────────────────────────────
+
+STATION_HOSTNAME="${STATION_HOSTNAME:-smartstation}"
+CURRENT_HOSTNAME=$(hostname)
+if [ "$CURRENT_HOSTNAME" != "$STATION_HOSTNAME" ]; then
+  log "Setting hostname to $STATION_HOSTNAME (was $CURRENT_HOSTNAME)..."
+  sudo hostnamectl set-hostname "$STATION_HOSTNAME"
+  echo "Devices will reach MQTT broker at ${STATION_HOSTNAME}.local"
+else
+  log "Hostname already set to $STATION_HOSTNAME"
+fi
+
 # ── [2/5] docker hub login ───────────────────────────────────────────────────
 
 log "[2/5] Docker Hub credentials (needed to pull private images)..."
