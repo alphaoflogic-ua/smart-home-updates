@@ -17,6 +17,12 @@ STATION_HOSTNAME="${STATION_HOSTNAME:-smartstation}"
 CURRENT_HOSTNAME=$(hostname)
 if [ "$CURRENT_HOSTNAME" != "$STATION_HOSTNAME" ]; then
   sudo hostnamectl set-hostname "$STATION_HOSTNAME"
+  # Update /etc/hosts so sudo can resolve the new hostname
+  if grep -q "$CURRENT_HOSTNAME" /etc/hosts; then
+    sudo sed -i "s/$CURRENT_HOSTNAME/$STATION_HOSTNAME/g" /etc/hosts
+  else
+    echo "127.0.1.1	$STATION_HOSTNAME" | sudo tee -a /etc/hosts > /dev/null
+  fi
   echo "Hostname set to $STATION_HOSTNAME (was $CURRENT_HOSTNAME)"
   echo "Devices will reach MQTT broker at ${STATION_HOSTNAME}.local"
 else
