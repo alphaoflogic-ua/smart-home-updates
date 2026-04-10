@@ -33,6 +33,12 @@ else
   fi
 fi
 
+# Restart avahi so mDNS advertises the correct hostname
+if systemctl is-active --quiet avahi-daemon 2>/dev/null; then
+  sudo systemctl restart avahi-daemon
+  echo "Restarted avahi-daemon (mDNS: ${STATION_HOSTNAME}.local)"
+fi
+
 echo "[4/8] Installing Bluetooth and system dependencies..."
 sudo apt install -y bluez util-linux rfkill dbus
 # bluetoothd must be running — noble uses D-Bus/BlueZ for BLE operations

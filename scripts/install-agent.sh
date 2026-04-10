@@ -144,6 +144,12 @@ else
   fi
 fi
 
+# Restart avahi so mDNS advertises the correct hostname
+if systemctl is-active --quiet avahi-daemon 2>/dev/null; then
+  sudo systemctl restart avahi-daemon
+  log "Restarted avahi-daemon (mDNS: ${STATION_HOSTNAME}.local)"
+fi
+
 # ── [2/5] docker hub login ───────────────────────────────────────────────────
 
 log "[2/5] Docker Hub credentials (needed to pull private images)..."
