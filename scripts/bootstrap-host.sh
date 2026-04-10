@@ -4,21 +4,32 @@ set -euo pipefail
 DEPLOY_DIR="${DEPLOY_DIR:-/opt/smart-home}"
 NEEDS_REBOOT=false
 
-echo "[1/7] Updating system packages..."
+echo "[1/8] Updating system packages..."
 sudo apt update
 sudo apt upgrade -y
 
-echo "[2/7] Installing Docker Engine..."
+echo "[2/8] Installing Docker Engine..."
 curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
 sudo sh /tmp/get-docker.sh
 
-echo "[3/7] Installing Bluetooth and system dependencies..."
+echo "[3/8] Setting hostname for mDNS discovery..."
+STATION_HOSTNAME="${STATION_HOSTNAME:-smartstation}"
+CURRENT_HOSTNAME=$(hostname)
+if [ "$CURRENT_HOSTNAME" != "$STATION_HOSTNAME" ]; then
+  sudo hostnamectl set-hostname "$STATION_HOSTNAME"
+  echo "Hostname set to $STATION_HOSTNAME (was $CURRENT_HOSTNAME)"
+  echo "Devices will reach MQTT broker at ${STATION_HOSTNAME}.local"
+else
+  echo "Hostname already set to $STATION_HOSTNAME"
+fi
+
+echo "[4/8] Installing Bluetooth and system dependencies..."
 sudo apt install -y bluez util-linux rfkill dbus
 # bluetoothd must be running — noble uses D-Bus/BlueZ for BLE operations
 sudo systemctl enable bluetooth
 sudo systemctl start bluetooth || true
 
-echo "[4/7] Configuring Bluetooth on host..."
+echo "[5/8] Configuring Bluetooth on host..."
 
 # Re-enable built-in Bluetooth if it was previously disabled (e.g. for a USB dongle).
 BOOT_CONFIG=""
@@ -47,14 +58,14 @@ else
   echo "WARNING: Bluetooth adapter hci0 not detected. It should appear after reboot."
 fi
 
-echo "[5/7] Installing Docker Compose plugin..."
+echo "[6/8] Installing Docker Compose plugin..."
 sudo apt install -y docker-compose-plugin
 
-echo "[6/7] Enabling Docker service..."
+echo "[7/8] Enabling Docker service..."
 sudo systemctl enable docker
 sudo systemctl start docker
 
-echo "[7/7] Adding user to docker group..."
+echo "[8/8] Adding user to docker group..."
 sudo usermod -aG docker "$USER"
 echo "NOTE: Group changes will be applied in the next step via 'newgrp docker'"
 
