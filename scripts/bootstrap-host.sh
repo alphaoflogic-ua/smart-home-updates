@@ -23,6 +23,10 @@ if [ "$CURRENT_HOSTNAME" != "$STATION_HOSTNAME" ]; then
   else
     echo "127.0.1.1	$STATION_HOSTNAME" | sudo tee -a /etc/hosts > /dev/null
   fi
+  # Prevent cloud-init from resetting hostname on reboot
+  if [ -f /etc/cloud/cloud.cfg ]; then
+    sudo sed -i 's/^preserve_hostname:.*/preserve_hostname: true/' /etc/cloud/cloud.cfg
+  fi
   echo "Hostname set to $STATION_HOSTNAME (was $CURRENT_HOSTNAME)"
   echo "Devices will reach MQTT broker at ${STATION_HOSTNAME}.local"
 else
