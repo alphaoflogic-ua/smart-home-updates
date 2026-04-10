@@ -137,6 +137,11 @@ if [ "$CURRENT_HOSTNAME" != "$STATION_HOSTNAME" ]; then
   echo "Devices will reach MQTT broker at ${STATION_HOSTNAME}.local"
 else
   log "Hostname already set to $STATION_HOSTNAME"
+  # Ensure /etc/hosts has the hostname even if it was set by a previous run
+  if ! grep -q "$STATION_HOSTNAME" /etc/hosts; then
+    echo "127.0.1.1	$STATION_HOSTNAME" | sudo tee -a /etc/hosts > /dev/null
+    log "Added $STATION_HOSTNAME to /etc/hosts"
+  fi
 fi
 
 # ── [2/5] docker hub login ───────────────────────────────────────────────────

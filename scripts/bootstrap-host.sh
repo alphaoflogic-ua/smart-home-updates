@@ -27,6 +27,10 @@ if [ "$CURRENT_HOSTNAME" != "$STATION_HOSTNAME" ]; then
   echo "Devices will reach MQTT broker at ${STATION_HOSTNAME}.local"
 else
   echo "Hostname already set to $STATION_HOSTNAME"
+  if ! grep -q "$STATION_HOSTNAME" /etc/hosts; then
+    echo "127.0.1.1	$STATION_HOSTNAME" | sudo tee -a /etc/hosts > /dev/null
+    echo "Added $STATION_HOSTNAME to /etc/hosts"
+  fi
 fi
 
 echo "[4/8] Installing Bluetooth and system dependencies..."
