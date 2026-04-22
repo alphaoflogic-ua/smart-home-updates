@@ -175,8 +175,8 @@ if [ -z "$chip_id" ]; then
   chip_id=$(grep -oP 'Serial\s*:\s*\K[0-9a-f]+' /proc/cpuinfo 2>/dev/null || echo "unknown")
 fi
 
-cur_cloud_url=$(env_current "CLOUD_WSS_URL")
-cloud_wss_url=$(prompt_value "CLOUD_WSS_URL" "Cloud WSS URL" "${cur_cloud_url:-wss://api.staging.svaroh.com}" false)
+cur_cloud_host=$(env_current "CLOUD_HOST")
+cloud_host=$(prompt_value "CLOUD_HOST" "Cloud host (e.g. api.staging.svaroh.com)" "${cur_cloud_host:-api.staging.svaroh.com}" false)
 
 cat > .env <<EOF
 STATION_ID='$station_id'
@@ -198,7 +198,7 @@ BACKEND_PUBLIC_URL='$backend_public_url'
 MQTT_PUBLIC_HOST='$mqtt_public_host'
 FIRMWARE_CACHE_DIR='$firmware_cache_dir'
 CHIP_ID='$chip_id'
-CLOUD_WSS_URL='$cloud_wss_url'
+CLOUD_HOST='$cloud_host'
 EOF
 
 echo "Saved configuration to .env"
