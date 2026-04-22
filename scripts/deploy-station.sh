@@ -176,7 +176,7 @@ if [ -z "$chip_id" ]; then
 fi
 
 cur_cloud_url=$(env_current "CLOUD_WSS_URL")
-cloud_wss_url=$(prompt_value "CLOUD_WSS_URL" "Cloud WSS URL (e.g. wss://cloud.example.com)" "${cur_cloud_url:-}" false)
+cloud_wss_url=$(prompt_value "CLOUD_WSS_URL" "Cloud WSS URL" "${cur_cloud_url:-wss://api.staging.svaroh.com}" false)
 
 cat > .env <<EOF
 STATION_ID='$station_id'
