@@ -59,7 +59,6 @@ services:
       - EMAIL_PROVIDER=${EMAIL_PROVIDER:-console}
       - RESEND_API_KEY=${RESEND_API_KEY:-}
       - EMAIL_FROM=${EMAIL_FROM:-}
-      - CHIP_ID=${CHIP_ID}
       - CLOUD_HOST=${CLOUD_HOST:-}
       - DBUS_SYSTEM_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket
     depends_on:

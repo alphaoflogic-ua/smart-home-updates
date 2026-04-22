@@ -143,7 +143,10 @@ echo "Generating configuration..."
 # Logic to determine actual IPs before environment generation
 actual_ip=$(get_local_ip)
 
-station_id=$(get_or_generate "STATION_ID" "" "uuid")
+station_id=$(env_current "STATION_ID")
+if [ -z "$station_id" ]; then
+  station_id=$(grep -oP 'Serial\s*:\s*\K[0-9a-f]+' /proc/cpuinfo 2>/dev/null || echo "unknown")
+fi
 db_user=$(get_or_generate "DB_USER" "smart_home_app")
 db_password=$(get_or_generate "DB_PASSWORD" "" "secret")
 db_name=$(get_or_generate "DB_NAME" "smart_home_app")
@@ -167,14 +170,6 @@ else
 fi
 firmware_cache_dir=$(get_or_generate "FIRMWARE_CACHE_DIR" "${_real_home}/firmware-cache")
 
-chip_id=$(env_current "CHIP_ID")
-if [ -z "$chip_id" ]; then
-  chip_id="${CHIP_ID:-}"
-fi
-if [ -z "$chip_id" ]; then
-  chip_id=$(grep -oP 'Serial\s*:\s*\K[0-9a-f]+' /proc/cpuinfo 2>/dev/null || echo "unknown")
-fi
-
 cur_cloud_host=$(env_current "CLOUD_HOST")
 cloud_host=$(prompt_value "CLOUD_HOST" "Cloud host (e.g. api.staging.svaroh.com)" "${cur_cloud_host:-api.staging.svaroh.com}" false)
 
@@ -197,7 +192,6 @@ AGENT_TOKEN='$agent_token'
 BACKEND_PUBLIC_URL='$backend_public_url'
 MQTT_PUBLIC_HOST='$mqtt_public_host'
 FIRMWARE_CACHE_DIR='$firmware_cache_dir'
-CHIP_ID='$chip_id'
 CLOUD_HOST='$cloud_host'
 EOF
 

@@ -241,11 +241,9 @@ update_url=$(prompt_value "Update manifest URL" "${cur_update_url:-https://raw.g
 check_interval=$(prompt_value "Check interval (minutes)" "${cur_interval:-60}" false false)
 auto_update=$(prompt_value "Auto update (true/false)" "${cur_auto:-true}" false false)
 agent_token="${cur_agent_token:-$(openssl rand -hex 16)}"
-chip_id=$(grep -oP 'Serial\s*:\s*\K[0-9a-f]+' /proc/cpuinfo || echo "unknown")
 
 cat > "$AGENT_DEST/.env" <<EOF
 STATION_ID='$station_id'
-CHIP_ID='$chip_id'
 UPDATE_SERVER_URL='$update_url'
 CHECK_INTERVAL_MINUTES='$check_interval'
 AUTO_UPDATE='$auto_update'
