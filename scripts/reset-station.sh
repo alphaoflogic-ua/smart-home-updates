@@ -50,10 +50,25 @@ sudo rm -rf "$AGENT_DEST"
 sudo rm -rf "$AGENT_DATA_DIR"
 sudo rm -rf "$FIRMWARE_CACHE_DIR"
 
-# stop and remove stack
+# stop and remove stack. docker-compose.yml requires BACKEND_VERSION/FRONTEND_VERSION
+# (no `:latest` fallback) so we pass stubs — `down -v` only reads compose for
+# labels/volumes, doesn't pull the bogus images.
 if [ -f "$DEPLOY_DIR/docker-compose.yml" ]; then
   echo "Stopping stack..."
-  sudo docker compose -f "$DEPLOY_DIR/docker-compose.yml" down -v 2>/dev/null || true
+  BACKEND_VERSION=stub FRONTEND_VERSION=stub \
+    sudo docker compose -f "$DEPLOY_DIR/docker-compose.yml" down -v || \
+    echo "  compose down failed — will try brute-force container removal next"
+fi
+
+# Brute-force fallback: kill any leftover containers labelled with this compose
+# project, regardless of whether `compose down` worked. Catches the case where
+# .env was already destroyed (so even with stubs above, compose can't find
+# anything) and the case where containers exist from a previous project layout.
+project=$(basename "$DEPLOY_DIR")
+leftover=$(sudo docker ps -a --filter "label=com.docker.compose.project=$project" --format '{{.ID}}' || true)
+if [ -n "$leftover" ]; then
+  echo "Removing leftover containers: $leftover"
+  echo "$leftover" | xargs sudo docker rm -f || true
 fi
 
 echo "Removing deployment dir..."

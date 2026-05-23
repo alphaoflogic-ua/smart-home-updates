@@ -173,6 +173,12 @@ firmware_cache_dir=$(get_or_generate "FIRMWARE_CACHE_DIR" "${_real_home}/firmwar
 cur_cloud_host=$(env_current "CLOUD_HOST")
 cloud_host=$(prompt_value "CLOUD_HOST" "Cloud host (e.g. api.staging.svaroh.com)" "${cur_cloud_host:-api.staging.svaroh.com}" false)
 
+# Preserve version vars seeded by install-agent.sh — compose.yml requires
+# BACKEND_VERSION/FRONTEND_VERSION (no `:latest` fallback), so the `docker
+# compose up -d` at the end of this script would otherwise fail.
+backend_version=$(env_current "BACKEND_VERSION")
+frontend_version=$(env_current "FRONTEND_VERSION")
+
 cat > .env <<EOF
 STATION_ID='$station_id'
 DB_USER='$db_user'
@@ -194,6 +200,10 @@ MQTT_PUBLIC_HOST='$mqtt_public_host'
 FIRMWARE_CACHE_DIR='$firmware_cache_dir'
 CLOUD_HOST='$cloud_host'
 EOF
+
+# Append version vars if they were seeded externally (by install-agent.sh)
+[ -n "$backend_version" ] && echo "BACKEND_VERSION='$backend_version'" >> .env
+[ -n "$frontend_version" ] && echo "FRONTEND_VERSION='$frontend_version'" >> .env
 
 echo "Saved configuration to .env"
 

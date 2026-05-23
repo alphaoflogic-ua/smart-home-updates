@@ -215,7 +215,10 @@ fi
 
 log "[3/5] Checking station stack..."
 
-if [ ! -f "$DEPLOY_DIR/.env" ]; then
+# Detect "stack configured" by presence of a key that only deploy-station.sh
+# writes — not file existence. The version-seed block above creates the file,
+# which would mask a fresh install.
+if [ ! -f "$DEPLOY_DIR/.env" ] || ! grep -q '^DB_PASSWORD=' "$DEPLOY_DIR/.env"; then
   log "Running station setup..."
   cd "$DEPLOY_DIR"
   bash "$DEPLOY_DIR/scripts/deploy-station.sh"
@@ -323,6 +326,18 @@ fi
 sudo systemctl daemon-reload
 sudo systemctl enable "$SERVICE_NAME"
 sudo systemctl restart "$SERVICE_NAME"
+
+# Reconcile running containers with current .env. docker compose tracks env-var
+# interpolation via the config-hash label and recreates only services whose
+# config actually changed — so this is a no-op on a healthy install but
+# essential on reinstalls where .env was edited (e.g. MQTT_PUBLIC_HOST after
+# hostname rename). Without this, the agent's bootstrap skips already-running
+# containers, leaving them with stale env from creation time.
+if [ -f "$DEPLOY_DIR/docker-compose.yml" ]; then
+  log "Reconciling stack with current .env..."
+  (cd "$DEPLOY_DIR" && sudo -u "$REAL_USER" docker compose up -d) || \
+    log "WARN: docker compose up -d failed — check $DEPLOY_DIR/.env"
+fi
 
 sleep 3
 
