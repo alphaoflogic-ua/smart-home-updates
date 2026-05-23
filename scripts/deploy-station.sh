@@ -161,7 +161,7 @@ agent_token=$(get_or_generate "AGENT_TOKEN" "" "secret")
 provisioning_scan_all=$(get_or_generate "PROVISIONING_SCAN_ALL" "false")
 provisioning_allow_nameless=$(get_or_generate "PROVISIONING_ALLOW_NAMELESS" "true")
 backend_public_url=$(get_or_generate "BACKEND_PUBLIC_URL" "http://$actual_ip:3000")
-mqtt_public_host=$(get_or_generate "MQTT_PUBLIC_HOST" "smartstation.local")
+mqtt_public_host=$(get_or_generate "MQTT_PUBLIC_HOST" "svaroh.local")
 # Resolve real user home (even when run via sudo)
 if [ -n "${SUDO_USER:-}" ] && [ "$SUDO_USER" != "root" ]; then
   _real_home=$(eval echo "~$SUDO_USER")

@@ -13,7 +13,7 @@ curl -fsSL https://get.docker.com -o /tmp/get-docker.sh
 sudo sh /tmp/get-docker.sh
 
 echo "[3/8] Setting hostname for mDNS discovery..."
-STATION_HOSTNAME="${STATION_HOSTNAME:-smartstation}"
+STATION_HOSTNAME="${STATION_HOSTNAME:-svaroh}"
 CURRENT_HOSTNAME=$(hostname)
 if [ "$CURRENT_HOSTNAME" != "$STATION_HOSTNAME" ]; then
   sudo hostnamectl set-hostname "$STATION_HOSTNAME"

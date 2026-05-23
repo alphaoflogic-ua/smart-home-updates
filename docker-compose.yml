@@ -23,7 +23,12 @@ services:
     network_mode: host
 
   backend:
-    image: andriicode/smart-home-backend:latest
+    # Version is required — must be set in .env (BACKEND_VERSION=0.2.95).
+    # install-agent.sh seeds it from release.json; station-agent updates rewrite
+    # it on every successful update. Using ${VAR:?...} (not `:latest`) makes a
+    # bare `docker compose up -d` fail loudly with a clear message instead of
+    # silently pulling a stale/wrong image and breaking the stack.
+    image: andriicode/smart-home-backend:${BACKEND_VERSION:?BACKEND_VERSION must be set in .env}
     container_name: smart-home-backend
     restart: unless-stopped
     network_mode: host
@@ -65,7 +70,7 @@ services:
         condition: service_started
 
   frontend:
-    image: andriicode/smart-home-frontend:latest
+    image: andriicode/smart-home-frontend:${FRONTEND_VERSION:?FRONTEND_VERSION must be set in .env}
     # platform: linux/amd64
     container_name: smart-home-frontend
     restart: unless-stopped

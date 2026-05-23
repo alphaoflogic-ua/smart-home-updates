@@ -123,7 +123,7 @@ echo "Docker: $(docker --version)"
 
 # ── hostname for mDNS ─────────────────────────────────────────────────────────
 
-STATION_HOSTNAME="${STATION_HOSTNAME:-smartstation}"
+STATION_HOSTNAME="${STATION_HOSTNAME:-svaroh}"
 CURRENT_HOSTNAME=$(hostname)
 if [ "$CURRENT_HOSTNAME" != "$STATION_HOSTNAME" ]; then
   log "Setting hostname to $STATION_HOSTNAME (was $CURRENT_HOSTNAME)..."
@@ -183,6 +183,33 @@ chmod +x "$DEPLOY_DIR/scripts/bootstrap-host.sh" "$DEPLOY_DIR/scripts/deploy-sta
 
 # Ensure deploy dir is owned by the real user so the agent can sync compose files
 chown -R "$REAL_USER":"$REAL_USER" "$DEPLOY_DIR"
+
+# ── seed image versions (required by docker-compose.yml) ─────────────────────
+# docker-compose.yml requires BACKEND_VERSION/FRONTEND_VERSION (no `:latest`
+# fallback — that turned out to be a foot-gun: a bare `docker compose up -d`
+# would resolve `:latest` against a stale local cache and break the stack).
+# Seed them from release.json so both deploy-station.sh's internal compose-up
+# and any later manual ops have a working version. station-agent's update flow
+# still pins exact images via its update-override file and wins over these.
+
+UPDATE_URL_FOR_SEED="${UPDATE_SERVER_URL:-https://raw.githubusercontent.com/${UPDATES_REPO}/${BRANCH}/release.json}"
+SEEDED_VER=$(curl -fsSL "$UPDATE_URL_FOR_SEED" 2>/dev/null | grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | cut -d'"' -f4 || true)
+
+if [ -n "$SEEDED_VER" ]; then
+  mkdir -p "$DEPLOY_DIR"
+  touch "$DEPLOY_DIR/.env"
+  for var in BACKEND_VERSION FRONTEND_VERSION; do
+    if grep -q "^${var}=" "$DEPLOY_DIR/.env"; then
+      sed -i "s|^${var}=.*|${var}='${SEEDED_VER}'|" "$DEPLOY_DIR/.env"
+    else
+      echo "${var}='${SEEDED_VER}'" >> "$DEPLOY_DIR/.env"
+    fi
+  done
+  log "Seeded BACKEND_VERSION/FRONTEND_VERSION = $SEEDED_VER"
+else
+  log "WARN: could not read $UPDATE_URL_FOR_SEED — BACKEND_VERSION/FRONTEND_VERSION not seeded"
+  log "      Set them manually in $DEPLOY_DIR/.env or compose up will fail."
+fi
 
 # ── [3/5] stack setup (first time) ───────────────────────────────────────────
 
