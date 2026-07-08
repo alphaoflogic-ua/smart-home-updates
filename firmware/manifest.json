@@ -18,5 +18,10 @@
     "version": "0.1.32",
     "file": "esp32-light@0.1.32.bin",
     "checksum": "sha256:05ae8300457647b6f7f8755aeaf004b62f813a3b25f6ccacfea743a3c3c829b6"
+  },
+  "esp32-light-cct": {
+    "version": "0.1.0",
+    "file": "esp32-light-cct@0.1.0.bin",
+    "checksum": "sha256:3a685ac2c7fc66f95bc78333334954e2d0dfac44bd1c7701d906e2c52a91b2e2"
   }
 }
