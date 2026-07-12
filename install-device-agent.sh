@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Non-interactive installer for a Svaroh device-agent (Raspberry Pi, arm64).
-# Usage:  install-device-agent.sh [<device>]        (default device: camera)
-#   e.g.  curl -fsSL .../install-device-agent.sh | sudo bash -s camera
+# Installer for a Svaroh device-agent (Raspberry Pi, arm64).
+# Run with no arg → interactive menu of published agents (device-agents.json).
+#   e.g.  curl -fsSL .../install-device-agent.sh | sudo bash
 # Node.js is NOT needed — the agent ships as a single SEA binary.
 #
 # Optional env overrides: STATION_BASE_URL, EXTERNAL_ID, DATA_DIR.
@@ -65,6 +65,38 @@ if [ "$ARCH" != "aarch64" ] && [ "$ARCH" != "arm64" ]; then
   exit 1
 fi
 
+# The camera agent shells out to gstreamer (HW H264 encode) reading the IMX290 CSI
+# sensor via libcamera. Install the runtime pieces; a missing package is a warning,
+# not a hard failure (names vary across Raspberry Pi OS releases).
+if [ "$DEVICE" = "camera" ]; then
+  log "Installing gstreamer + libcamera for the camera pipeline..."
+  sudo apt-get update -qq
+  sudo apt-get install -y \
+    gstreamer1.0-tools \
+    gstreamer1.0-plugins-base \
+    gstreamer1.0-plugins-good \
+    gstreamer1.0-plugins-bad \
+    gstreamer1.0-libcamera \
+    libcamera-tools ||
+    echo "WARN: some gstreamer/libcamera packages were not installed — verify the camera pipeline manually."
+
+  # Enable the CSI sensor. IMX290 is a third-party sensor, so camera_auto_detect
+  # (official Pi cameras only) won't bring it up — it needs an explicit overlay and
+  # a reboot. Override for a different board via CAMERA_OVERLAY / CAMERA_CLOCK.
+  CAMERA_OVERLAY="${CAMERA_OVERLAY:-imx290}"
+  CAMERA_CLOCK="${CAMERA_CLOCK:-37125000}"
+  CONFIG_TXT="/boot/firmware/config.txt"
+  [ -f "$CONFIG_TXT" ] || CONFIG_TXT="/boot/config.txt"
+  OVERLAY_LINE="dtoverlay=${CAMERA_OVERLAY},clock-frequency=${CAMERA_CLOCK}"
+  if [ -f "$CONFIG_TXT" ] && ! grep -qxF "$OVERLAY_LINE" "$CONFIG_TXT"; then
+    log "Enabling ${CAMERA_OVERLAY} sensor overlay in ${CONFIG_TXT} (reboot needed)..."
+    sudo cp "$CONFIG_TXT" "${CONFIG_TXT}.svaroh.bak"
+    sudo sed -i 's/^camera_auto_detect=1/camera_auto_detect=0/' "$CONFIG_TXT"
+    echo "$OVERLAY_LINE" | sudo tee -a "$CONFIG_TXT" > /dev/null
+    CAMERA_REBOOT_REQUIRED=1
+  fi
+fi
+
 # ── [1/3] install binary ──────────────────────────────────────────────────────
 log "[1/3] Installing ${AGENT} binary to $AGENT_DEST..."
 sudo mkdir -p "$AGENT_DEST" "$DATA_DIR"
@@ -124,6 +156,22 @@ echo "              then updates itself and restarts (no reinstall needed)."
 echo "              Force a re-check now:  sudo systemctl restart $SERVICE_NAME"
 echo "              Custom manifest:       set OTA_MANIFEST_URL in $AGENT_DEST/.env"
 echo ""
-echo "Reinstall:    curl -fsSL ${RAW}/install-device-agent.sh | sudo bash -s ${DEVICE}"
-echo "Remove:       curl -fsSL ${RAW}/reset-device-agent.sh | sudo bash -s ${DEVICE}"
+echo "Reinstall:    curl -fsSL ${RAW}/install-device-agent.sh | sudo bash   (pick from menu)"
+echo "Remove:       curl -fsSL ${RAW}/reset-device-agent.sh   | sudo bash   (pick from menu)"
 echo "              (add PURGE_DATA=1 to also drop enrollment config)"
+
+# The sensor overlay only takes effect after a reboot; offer it (interactive only).
+if [ "${CAMERA_REBOOT_REQUIRED:-0}" = "1" ]; then
+  echo ""
+  echo "⚠  Camera sensor overlay added — a REBOOT is required for the sensor to appear."
+  echo "   After reboot:  rpicam-hello --list-cameras   should list it; the agent streams on demand."
+  if [ -t 0 ]; then
+    read -r -p "Reboot now? [y/N] " REBOOT_ANS || REBOOT_ANS=""
+    case "$REBOOT_ANS" in
+      [yY]*) sudo reboot ;;
+      *) echo "   Reboot later:  sudo reboot" ;;
+    esac
+  else
+    echo "   Reboot to finish:  sudo reboot"
+  fi
+fi
