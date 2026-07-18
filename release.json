@@ -1,7 +1,7 @@
 {
-  "version": "0.2.101",
+  "version": "0.2.102",
   "images": {
-    "backend": "andriicode/smart-home-backend:0.2.101",
+    "backend": "andriicode/smart-home-backend:0.2.102",
     "frontend": "andriicode/smart-home-frontend:0.2.101"
   }
 }
