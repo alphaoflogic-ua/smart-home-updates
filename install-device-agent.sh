@@ -109,6 +109,10 @@ log "[2/3] Writing config to $AGENT_DEST/.env..."
 {
   echo "DATA_DIR='$DATA_DIR'"
   echo "OTA_MANIFEST_URL='$OTA_MANIFEST_URL'"
+  # STUN lets the camera advertise a public (srflx) ICE candidate so a REMOTE viewer's
+  # TURN relay can reach it — without it the camera only offers its private LAN address
+  # and remote (mobile) media never connects (coturn refuses to relay to a private IP).
+  echo "STUN_URL='${STUN_URL:-stun:turn.staging.svaroh.com:3478}'"
   if [ -n "${STATION_BASE_URL:-}" ]; then echo "STATION_BASE_URL='$STATION_BASE_URL'"; fi
   if [ -n "${EXTERNAL_ID:-}" ]; then echo "EXTERNAL_ID='$EXTERNAL_ID'"; fi
 } | sudo tee "$AGENT_DEST/.env" > /dev/null
