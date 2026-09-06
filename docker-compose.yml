@@ -35,6 +35,16 @@ services:
     volumes:
       - /var/run/dbus:/var/run/dbus
       - ${FIRMWARE_CACHE_DIR:-/home/pi/firmware-cache}:/firmware-cache:ro
+      # The archive's PARENT is mounted, and the backend writes one level
+      # down, so that the dedicated-disk check keeps working: it compares the
+      # st_dev of the directory against its parent, and both have to be on the
+      # container's side of the bind for that to mean anything. Binding the
+      # archive directory itself makes the two devices differ unconditionally
+      # (bind vs overlay), and the check then passes on a station with no disk
+      # at all — measured on hardware: 56 vs 45826 with nothing mounted.
+      # Production mounts the archive disk at $RECORDINGS_HOST_DIR/recordings;
+      # dev leaves it a plain directory and turns requireDedicatedStorage off.
+      - ${RECORDINGS_HOST_DIR:-/home/pi/archive}:/data/archive
     environment:
       - DB_HOST=127.0.0.1
       - DB_PORT=5432
@@ -42,6 +52,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - PORT=3000
+      - RECORDINGS_DIR=/data/archive/recordings
       - NODE_ENV=production
       - MQTT_URL=mqtt://127.0.0.1:1883
       - MQTT_USER=${MQTT_USER}
