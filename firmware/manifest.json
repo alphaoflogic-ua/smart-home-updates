@@ -1,27 +1,37 @@
 {
   "esp32-climate": {
-    "version": "0.1.32",
-    "file": "esp32-climate@0.1.32.bin",
-    "checksum": "sha256:fc46fa997bd9fcf477cb87fc2ccdb0342d7aaf7ec4199095c834f28bb0c75f74"
+    "version": "0.1.33",
+    "file": "esp32-climate@0.1.33.bin",
+    "checksum": "sha256:bacf68411408f326c7bf0b276fb77913788f53daa172a5519c4beaf3906f2f98"
   },
   "esp32-pir": {
-    "version": "0.1.32",
-    "file": "esp32-pir@0.1.32.bin",
-    "checksum": "sha256:ba95b63f80bbd31e26ba714ebaf31f4875bac0474642a06aade3df6e8184534e"
+    "version": "0.1.33",
+    "file": "esp32-pir@0.1.33.bin",
+    "checksum": "sha256:0b9b7c4047cf46a418919dd0ea4abd90562de7cc1488f0535ec677a434df8be9"
   },
   "esp32-switch-pir": {
-    "version": "0.1.32",
-    "file": "esp32-switch-pir@0.1.32.bin",
-    "checksum": "sha256:3187b5017cc014513c806787876e31319485c32b0518f293ce3adc8701ee121e"
+    "version": "0.1.33",
+    "file": "esp32-switch-pir@0.1.33.bin",
+    "checksum": "sha256:2d33fb8c7486e66b2c653cab68775eada7e1d1125e612996f3ca3c287b6ba22f"
   },
   "esp32-light": {
-    "version": "0.1.32",
-    "file": "esp32-light@0.1.32.bin",
-    "checksum": "sha256:05ae8300457647b6f7f8755aeaf004b62f813a3b25f6ccacfea743a3c3c829b6"
+    "version": "0.1.33",
+    "file": "esp32-light@0.1.33.bin",
+    "checksum": "sha256:1f3de8ac6a7fec3eddcddb7afbff332a42b72a28713e14b01bd6139ac2ae0b4b"
   },
   "esp32-light-cct": {
-    "version": "0.1.0",
-    "file": "esp32-light-cct@0.1.0.bin",
-    "checksum": "sha256:3a685ac2c7fc66f95bc78333334954e2d0dfac44bd1c7701d906e2c52a91b2e2"
+    "version": "0.1.33",
+    "file": "esp32-light-cct@0.1.33.bin",
+    "checksum": "sha256:d1770ba04b09d0ce1b90eee127bd11601fd59bb5e3eb0750d19fc7184180599a"
+  },
+  "esp32_c3_super_mini-relay": {
+    "version": "0.1.33",
+    "file": "esp32_c3_super_mini-relay@0.1.33.bin",
+    "checksum": "sha256:6c303ea0cfec7cc12d01036cc6e36a59f5fdc41208d2aedd8f3091fbb29421b7"
+  },
+  "esp32-esp32c3-switch-pir": {
+    "version": "0.1.33",
+    "file": "esp32c3-switch-pir@0.1.33.bin",
+    "checksum": "sha256:2b9e45fab78c7a25bbbe11c86de13effc35ece489e6d87e31722261a634825f0"
   }
 }
