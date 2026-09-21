@@ -33,5 +33,10 @@
     "version": "0.1.33",
     "file": "esp32c3-switch-pir@0.1.33.bin",
     "checksum": "sha256:2b9e45fab78c7a25bbbe11c86de13effc35ece489e6d87e31722261a634825f0"
+  },
+  "esp32_c3-light-cct": {
+    "version": "0.0.2",
+    "file": "esp32_c3-light-cct@0.0.2.bin",
+    "checksum": "sha256:775eb8432236dfa93b7fc1c147979464a52ae2694e1d58c0d6c84760a378fca6"
   }
 }
