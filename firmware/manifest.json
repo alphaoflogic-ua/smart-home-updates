@@ -15,9 +15,9 @@
     "checksum": "sha256:2d33fb8c7486e66b2c653cab68775eada7e1d1125e612996f3ca3c287b6ba22f"
   },
   "esp32-light": {
-    "version": "0.1.33",
-    "file": "esp32-light@0.1.33.bin",
-    "checksum": "sha256:1f3de8ac6a7fec3eddcddb7afbff332a42b72a28713e14b01bd6139ac2ae0b4b"
+    "version": "0.1.34",
+    "file": "esp32-light@0.1.34.bin",
+    "checksum": "sha256:0a78a50d26cdbcca937424bd4c53d99e293e389457a0662a9dbbcaafc623d18d"
   },
   "esp32-light-cct": {
     "version": "0.1.33",
