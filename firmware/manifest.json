@@ -40,8 +40,8 @@
     "checksum": "sha256:775eb8432236dfa93b7fc1c147979464a52ae2694e1d58c0d6c84760a378fca6"
   },
   "esp32_c3-relay": {
-    "version": "0.1.34",
-    "file": "esp32_c3-relay@0.1.34.bin",
-    "checksum": "sha256:293a8490972a77c42309abdf08acbf8132f16f641e1f2e73cf3fc907629242fd"
+    "version": "0.1.35",
+    "file": "esp32_c3-relay@0.1.35.bin",
+    "checksum": "sha256:351fdf95dd49ac3f4c820ae8f8b44dacc5607d6a61858c4671e357e42b96ba3d"
   }
 }
