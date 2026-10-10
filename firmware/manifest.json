@@ -1,28 +1,28 @@
 {
   "esp32-climate": {
-    "version": "0.1.36",
-    "file": "esp32-climate@0.1.36.bin",
-    "checksum": "sha256:c92086f8a5551b5bc8bb38a84a166e13f3ae72112497931b80b8c9c7fa021f14"
+    "version": "0.1.37",
+    "file": "esp32-climate@0.1.37.bin",
+    "checksum": "sha256:40c22b8ce112c52c2c5860363e4422135256b9129a240a3b960a3439c276db6b"
   },
   "esp32-pir": {
-    "version": "0.1.36",
-    "file": "esp32-pir@0.1.36.bin",
-    "checksum": "sha256:ac51fab234e9d1b249b5cfb8ae7e98ecde3ed6a0f0f85130ae56c7d292d50ada"
+    "version": "0.1.37",
+    "file": "esp32-pir@0.1.37.bin",
+    "checksum": "sha256:f7f121f2938b021f7fc0a66cca3b823298f6024501332d66aa70c38f69e9de10"
   },
   "esp32-switch-pir": {
-    "version": "0.1.36",
-    "file": "esp32-switch-pir@0.1.36.bin",
-    "checksum": "sha256:35cc145043b00cfb76f18fdfd0be4d301b0e93b7c6a473d953a9d8bf7993c0ef"
+    "version": "0.1.37",
+    "file": "esp32-switch-pir@0.1.37.bin",
+    "checksum": "sha256:b822cba20bc2b55bccb8f6d6affd597122a72431bdec28ec9e19430cdb9a2b25"
   },
   "esp32-light": {
-    "version": "0.1.36",
-    "file": "esp32-light@0.1.36.bin",
-    "checksum": "sha256:31a78be06e511926d874117ee3c49f52d3853930ff7e6d9778051c3384d0f6a2"
+    "version": "0.1.37",
+    "file": "esp32-light@0.1.37.bin",
+    "checksum": "sha256:a466af2e523c56b4d5b223bf9e138b5f971038c4f99f02f73808cdaf49d640e8"
   },
   "esp32-light-cct": {
-    "version": "0.1.36",
-    "file": "esp32-light-cct@0.1.36.bin",
-    "checksum": "sha256:281528d03ab0294428cd2fffde8b2c8f2cbff6cd748d972dadfe74a1b1c873e5"
+    "version": "0.1.37",
+    "file": "esp32-light-cct@0.1.37.bin",
+    "checksum": "sha256:8630f82b7a96af9d7c68ee2c5a81c9538e8297de1639df8f7d85070d2b8387ca"
   },
   "esp32_c3_super_mini-relay": {
     "version": "0.1.33",
@@ -30,18 +30,18 @@
     "checksum": "sha256:6c303ea0cfec7cc12d01036cc6e36a59f5fdc41208d2aedd8f3091fbb29421b7"
   },
   "esp32-esp32c3-switch-pir": {
-    "version": "0.1.36",
-    "file": "esp32c3-switch-pir@0.1.36.bin",
-    "checksum": "sha256:49dc724702f4f70b1c247d727710fd95fa34a2a52eb8ea5f5220df33be974354"
+    "version": "0.1.37",
+    "file": "esp32c3-switch-pir@0.1.37.bin",
+    "checksum": "sha256:9e323250ebad38c2a0103e9e909e34a3283506d4ceb2ef00e6fffe08a6de3532"
   },
   "esp32_c3-light-cct": {
-    "version": "0.1.36",
-    "file": "esp32_c3-light-cct@0.1.36.bin",
-    "checksum": "sha256:85971f72c34f8a3e7a1a1749cc549e5a8185dd4c6c20db29395c5c5367cbbebc"
+    "version": "0.1.37",
+    "file": "esp32_c3-light-cct@0.1.37.bin",
+    "checksum": "sha256:69ddfb00d4cda7aedb1e6f9685dda06be0117f3b4e863a6eab6a9590dd4a0c2c"
   },
   "esp32_c3-relay": {
-    "version": "0.1.36",
-    "file": "esp32_c3-relay@0.1.36.bin",
-    "checksum": "sha256:89fffc3df6891d67758c15e51723aa28c98383bc9284afd2acff0c1dccdc83c3"
+    "version": "0.1.37",
+    "file": "esp32_c3-relay@0.1.37.bin",
+    "checksum": "sha256:8e6b0bdad3f20e37c863aa03331d788699472dc18329a39d8ba3bed7208e66b9"
   }
 }
