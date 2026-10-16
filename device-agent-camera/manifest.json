@@ -1,4 +1,5 @@
 {
-  "version": "0.1.14",
-  "binary": "device-agent-camera-linux-arm64"
+  "version": "0.1.15",
+  "binary": "device-agent-camera-linux-arm64",
+  "checksum": "sha256:a916d68c81b5a5a5387707c40634466fdbc668792308695834e8a1bb4d4d259b"
 }
