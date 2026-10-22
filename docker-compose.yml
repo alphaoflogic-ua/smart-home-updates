@@ -24,10 +24,10 @@ services:
 
   backend:
     # Version is required — must be set in .env (BACKEND_VERSION=0.2.95).
-    # install-agent.sh seeds it from release.json; station-agent updates rewrite
-    # it on every successful update. Using ${VAR:?...} (not `:latest`) makes a
-    # bare `docker compose up -d` fail loudly with a clear message instead of
-    # silently pulling a stale/wrong image and breaking the stack.
+    # install-agent.sh seeds it from release.json; station-agent rewrites it after
+    # a healthy update or rollback (see station-agent/README.md). Using ${VAR:?...}
+    # (not `:latest`) makes a bare `docker compose up -d` fail loudly with a clear
+    # message instead of silently pulling a stale/wrong image and breaking the stack.
     image: andriicode/smart-home-backend:${BACKEND_VERSION:?BACKEND_VERSION must be set in .env}
     container_name: smart-home-backend
     restart: unless-stopped
@@ -72,6 +72,7 @@ services:
       - BACKEND_PUBLIC_URL=${BACKEND_PUBLIC_URL}
       - MQTT_PUBLIC_HOST=${MQTT_PUBLIC_HOST}
       - AGENT_TOKEN=${AGENT_TOKEN:-}
+      - STATION_AGENT_TOKEN=${STATION_AGENT_TOKEN:-}
       - CLOUD_HOST=${CLOUD_HOST:-}
       - DBUS_SYSTEM_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket
     depends_on:

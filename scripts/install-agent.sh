@@ -52,6 +52,20 @@ env_current() {
   fi
 }
 
+# Only for generated values: the sed replacement does not escape '|', '&' or quotes.
+env_set() {
+  local file="$1"
+  local key="$2"
+  local value="$3"
+  if grep -q "^${key}=" "$file"; then
+    sed -i "s|^${key}=.*|${key}='${value}'|" "$file"
+  else
+    # A last line without a newline would swallow the appended key.
+    if [ -s "$file" ] && [ -n "$(tail -c1 "$file")" ]; then echo >> "$file"; fi
+    echo "${key}='${value}'" >> "$file"
+  fi
+}
+
 prompt_value() {
   local prompt_text="$1"
   local default="$2"
@@ -190,7 +204,8 @@ chown -R "$REAL_USER":"$REAL_USER" "$DEPLOY_DIR"
 # would resolve `:latest` against a stale local cache and break the stack).
 # Seed them from release.json so both deploy-station.sh's internal compose-up
 # and any later manual ops have a working version. station-agent's update flow
-# still pins exact images via its update-override file and wins over these.
+# pins exact images via its update-override file and, once the update is
+# healthy, writes them back into these two vars.
 
 UPDATE_URL_FOR_SEED="${UPDATE_SERVER_URL:-https://raw.githubusercontent.com/${UPDATES_REPO}/${BRANCH}/release.json}"
 SEEDED_VER=$(curl -fsSL "$UPDATE_URL_FOR_SEED" 2>/dev/null | grep -o '"version"[[:space:]]*:[[:space:]]*"[^"]*"' | head -1 | cut -d'"' -f4 || true)
@@ -261,17 +276,20 @@ cur_station_id=$(env_current  "$AGENT_DEST/.env" "STATION_ID")
 cur_update_url=$(env_current  "$AGENT_DEST/.env" "UPDATE_SERVER_URL")
 cur_interval=$(env_current    "$AGENT_DEST/.env" "CHECK_INTERVAL_MINUTES")
 cur_auto=$(env_current        "$AGENT_DEST/.env" "AUTO_UPDATE")
-cur_agent_token=$(env_current "$AGENT_DEST/.env" "AGENT_API_TOKEN")
-[ -z "$cur_agent_token" ] && cur_agent_token=$(env_current "$AGENT_DEST/.env" "AGENT_TOKEN")
 cur_backend_agent_token=$(env_current "$AGENT_DEST/.env" "BACKEND_AGENT_TOKEN")
 stack_agent_token=$(env_current "$STACK_ENV" "AGENT_TOKEN")
+stack_station_agent_token=$(env_current "$STACK_ENV" "STATION_AGENT_TOKEN")
 
 auto_station_id=$(grep -oP 'Serial\s*:\s*\K[0-9a-f]+' /proc/cpuinfo 2>/dev/null || true)
 station_id=$(prompt_value "Station ID" "${cur_station_id:-${stack_station_id:-${auto_station_id:-}}}" true false)
 update_url=$(prompt_value "Update manifest URL" "${cur_update_url:-https://raw.githubusercontent.com/alphaoflogic-ua/smart-home-updates/main/release.json}" true false)
 check_interval=$(prompt_value "Check interval (minutes)" "${cur_interval:-60}" false false)
-auto_update=$(prompt_value "Auto update (true/false)" "${cur_auto:-true}" false false)
-agent_token="${cur_agent_token:-$(openssl rand -hex 16)}"
+auto_update=$(prompt_value "Auto update by default (true/false; the station page can override it)" "${cur_auto:-true}" false false)
+
+# Backend → agent token, the same in both files; a stack without STATION_AGENT_TOKEN gets a new one.
+agent_token="${stack_station_agent_token:-$(openssl rand -hex 16)}"
+[[ $agent_token =~ ^[A-Za-z0-9]+$ ]] || agent_token=$(openssl rand -hex 16)
+env_set "$STACK_ENV" "STATION_AGENT_TOKEN" "$agent_token"
 
 cat > "$AGENT_DEST/.env" <<EOF
 STATION_ID='$station_id'
