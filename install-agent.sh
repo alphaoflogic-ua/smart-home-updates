@@ -16,7 +16,7 @@ fi
 UPDATES_REPO="${UPDATES_REPO:-alphaoflogic-ua/smart-home-updates}"
 BRANCH="${BRANCH:-main}"
 RAW="https://raw.githubusercontent.com/${UPDATES_REPO}/${BRANCH}"
-BINARY_URL="https://raw.githubusercontent.com/${UPDATES_REPO}/${BRANCH}/station-agent/station-agent-linux-arm64"
+AGENT_MANIFEST_URL="${RAW}/station-agent/manifest.json"
 
 AGENT_DEST="${AGENT_DEST:-/opt/station-agent}"
 AGENT_DATA_DIR="${AGENT_DATA_DIR:-/var/lib/station-agent}"
@@ -36,6 +36,42 @@ fi
 # ── helpers ───────────────────────────────────────────────────────────────────
 
 log() { echo "==> $*"; }
+
+manifest_field() {
+  grep -o "\"$1\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" <<< "$2" | head -1 | cut -d'"' -f4 || true
+}
+
+# The binary is a release asset, not a file in the repo: its manifest names the URL and the
+# sha256. It lands next to the target and replaces it only once the checksum matches.
+install_binary() {
+  local manifest_url="$1" dest="$2" manifest binary checksum url tmp
+  manifest=$(curl -fsSL "$manifest_url")
+  binary=$(manifest_field binary "$manifest")
+  checksum=$(manifest_field checksum "$manifest")
+  checksum="${checksum#sha256:}"
+  if [ -z "$binary" ] || ! [[ "$checksum" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "ERROR: $manifest_url names no binary or no sha256 checksum." >&2
+    exit 1
+  fi
+  case "$binary" in
+    http://* | https://*) url="$binary" ;;
+    *) url="${manifest_url%/*}/$binary" ;;
+  esac
+  # A fixed name, so a download cut short is overwritten next time rather than left behind.
+  tmp="$dest.new"
+  if ! curl -fsSL "$url" | sudo tee "$tmp" > /dev/null; then
+    sudo rm -f "$tmp"
+    echo "ERROR: could not download $url." >&2
+    exit 1
+  fi
+  if ! echo "$checksum  $tmp" | sudo sha256sum -c --status -; then
+    sudo rm -f "$tmp"
+    echo "ERROR: $url does not match the checksum in $manifest_url." >&2
+    exit 1
+  fi
+  sudo chmod 755 "$tmp"
+  sudo mv "$tmp" "$dest"
+}
 
 download() {
   local src="$1"
@@ -253,8 +289,7 @@ log "[4/5] Installing station-agent binary to $AGENT_DEST..."
 sudo mkdir -p "$AGENT_DEST"
 sudo mkdir -p "$AGENT_DATA_DIR"
 
-curl -fsSL "$BINARY_URL" | sudo tee "$AGENT_DEST/station-agent" > /dev/null
-sudo chmod +x "$AGENT_DEST/station-agent"
+install_binary "$AGENT_MANIFEST_URL" "$AGENT_DEST/station-agent"
 # Allow binding to port 80 for captive portal (runs as non-root user)
 sudo setcap cap_net_bind_service=+ep "$AGENT_DEST/station-agent"
 

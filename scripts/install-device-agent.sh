@@ -43,7 +43,6 @@ if [ -z "$DEVICE" ]; then
 fi
 
 AGENT="device-agent-${DEVICE}"
-BINARY_URL="${RAW}/${AGENT}/${AGENT}-linux-arm64"
 OTA_MANIFEST_URL="${RAW}/${AGENT}/manifest.json"
 
 AGENT_DEST="${AGENT_DEST:-/opt/${AGENT}}"
@@ -51,6 +50,42 @@ DATA_DIR="${DATA_DIR:-/var/lib/${AGENT}}"
 SERVICE_NAME="$AGENT"
 
 log() { echo "==> $*"; }
+
+manifest_field() {
+  grep -o "\"$1\"[[:space:]]*:[[:space:]]*\"[^\"]*\"" <<< "$2" | head -1 | cut -d'"' -f4 || true
+}
+
+# The binary is a release asset, not a file in the repo: its manifest names the URL and the
+# sha256. It lands next to the target and replaces it only once the checksum matches.
+install_binary() {
+  local manifest_url="$1" dest="$2" manifest binary checksum url tmp
+  manifest=$(curl -fsSL "$manifest_url")
+  binary=$(manifest_field binary "$manifest")
+  checksum=$(manifest_field checksum "$manifest")
+  checksum="${checksum#sha256:}"
+  if [ -z "$binary" ] || ! [[ "$checksum" =~ ^[0-9a-f]{64}$ ]]; then
+    echo "ERROR: $manifest_url names no binary or no sha256 checksum." >&2
+    exit 1
+  fi
+  case "$binary" in
+    http://* | https://*) url="$binary" ;;
+    *) url="${manifest_url%/*}/$binary" ;;
+  esac
+  # A fixed name, so a download cut short is overwritten next time rather than left behind.
+  tmp="$dest.new"
+  if ! curl -fsSL "$url" | sudo tee "$tmp" > /dev/null; then
+    sudo rm -f "$tmp"
+    echo "ERROR: could not download $url." >&2
+    exit 1
+  fi
+  if ! echo "$checksum  $tmp" | sudo sha256sum -c --status -; then
+    sudo rm -f "$tmp"
+    echo "ERROR: $url does not match the checksum in $manifest_url." >&2
+    exit 1
+  fi
+  sudo chmod 755 "$tmp"
+  sudo mv "$tmp" "$dest"
+}
 
 # ── [1/3] prerequisites ───────────────────────────────────────────────────────
 if ! command -v curl >/dev/null 2>&1; then
@@ -65,11 +100,10 @@ if [ "$ARCH" != "aarch64" ] && [ "$ARCH" != "arm64" ]; then
   exit 1
 fi
 
-# The camera agent shells out to gstreamer (HW H264 encode) reading the IMX290 CSI
-# sensor via libcamera. Install the runtime pieces; a missing package is a warning,
-# not a hard failure (names vary across Raspberry Pi OS releases).
+# A missing package is a warning, not a hard failure: names vary across Pi OS releases.
+# rpicam-apps goes with libcamera, because the image's rpicam segfaults on a newer one.
 if [ "$DEVICE" = "camera" ]; then
-  log "Installing gstreamer + libcamera for the camera pipeline..."
+  log "Installing gstreamer + libcamera + rpicam for the camera pipeline..."
   sudo apt-get update -qq
   sudo apt-get install -y \
     gstreamer1.0-tools \
@@ -77,7 +111,8 @@ if [ "$DEVICE" = "camera" ]; then
     gstreamer1.0-plugins-good \
     gstreamer1.0-plugins-bad \
     gstreamer1.0-libcamera \
-    libcamera-tools ||
+    libcamera-tools \
+    rpicam-apps ||
     echo "WARN: some gstreamer/libcamera packages were not installed — verify the camera pipeline manually."
 
   # Enable the CSI sensor. IMX290 is a third-party sensor, so camera_auto_detect
@@ -100,8 +135,7 @@ fi
 # ── [1/3] install binary ──────────────────────────────────────────────────────
 log "[1/3] Installing ${AGENT} binary to $AGENT_DEST..."
 sudo mkdir -p "$AGENT_DEST" "$DATA_DIR"
-curl -fsSL "$BINARY_URL" | sudo tee "$AGENT_DEST/${AGENT}" > /dev/null
-sudo chmod +x "$AGENT_DEST/${AGENT}"
+install_binary "$OTA_MANIFEST_URL" "$AGENT_DEST/${AGENT}"
 sudo chown -R "$REAL_USER":"$REAL_USER" "$AGENT_DEST" "$DATA_DIR"
 
 # ── [2/3] write env ───────────────────────────────────────────────────────────

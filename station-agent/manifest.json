@@ -1,0 +1,5 @@
+{
+  "version": "0.2.142",
+  "binary": "https://github.com/alphaoflogic-ua/smart-home-updates/releases/download/station-agent-v0.2.142/station-agent-linux-arm64",
+  "checksum": "sha256:ac31504275436f2bf254bee83f07bdc08b0a10b857818373829f6d2bc4c2368e"
+}
