@@ -394,18 +394,6 @@ fi
 
 sleep 3
 
-archive_host_dir=$(env_current "$STACK_ENV" "RECORDINGS_HOST_DIR")
-archive_dir="${archive_host_dir:-/home/pi/archive}/recordings"
-if [ -d "$archive_dir" ] && mountpoint -q "$archive_dir" 2>/dev/null; then
-  log "Archive disk is mounted at $archive_dir"
-  df -h "$archive_dir" || true
-else
-  log "WARN: no archive disk is mounted at $archive_dir"
-  echo "    Recording will not work until a disk is mounted there, or recording"
-  echo "    on the system card is allowed in the station web UI"
-  echo "    (Settings -> Station -> Recording storage)."
-fi
-
 LOCAL_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
 
 echo ""

@@ -1,5 +1,5 @@
 {
-  "version": "0.1.15",
-  "binary": "https://github.com/alphaoflogic-ua/smart-home-updates/releases/download/device-agent-camera-v0.1.15/device-agent-camera-linux-arm64",
-  "checksum": "sha256:a916d68c81b5a5a5387707c40634466fdbc668792308695834e8a1bb4d4d259b"
+  "version": "0.1.16",
+  "binary": "https://github.com/alphaoflogic-ua/smart-home-updates/releases/download/device-agent-camera-v0.1.16/device-agent-camera-linux-arm64",
+  "checksum": "sha256:6f32fe79aeb2e9812b6af7cc4b8b9248fa110dd2037da416e9f634fe6572732e"
 }
